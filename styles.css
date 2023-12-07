@@ -1,0 +1,24 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+#canvas {
+    border: 5px solid black;
+    background-color: rgb(42, 91, 131);
+    max-height: 100%;
+    max-width: 100%;
+    font-family: "Special Elite";
+}
+
+img {
+    display: none;
+}

@@ -1,0 +1,666 @@
+// constants
+const CANVAS_WIDTH = 500;
+const CANVAS_HEIGHT = 500;
+
+const PLAYER_WIDTH = 120;
+const PLAYER_HEIGHT = 190;
+const PLAYER_OFFSET_X = 20;
+const PLAYER_SPEED = 3;
+
+const ENEMY_ANGLER1_WIDTH = 228;
+const ENEMY_ANGLER1_HEIGHT = 169;
+const ENEMY_ANGLER1_LIVES = 3;
+const ENEMY_ANGLER1_POINTS = ENEMY_ANGLER1_LIVES;
+const ENEMY_ANGLER2_WIDTH = 213;
+const ENEMY_ANGLER2_HEIGHT = 169;
+const ENEMY_ANGLER2_LIVES = 3;
+const ENEMY_ANGLER2_POINTS = ENEMY_ANGLER2_LIVES;
+const ENEMY_LUCKY_WIDTH = 99;
+const ENEMY_LUCKY_HEIGHT = 95;
+const ENEMY_LUCKY_LIVES = 3;
+const ENEMY_LUCKY_POINTS = 15;
+const ENEMY_SPAWN_INTERVAL_MS = 3000;
+const ENEMY_MAX_SPEED = 2;
+const ENEMY_TYPE_ANGLER = "angler";
+const ENEMY_TYPE_LUCKY = "lucky";
+
+const PROJECTILE_WIDTH = 28;
+const PROJECTILE_HEIGHT = 10;
+const PROJECTILE_OFFSET_X = 98;
+const PROJECTILE_TOP_OFFSET_Y = 28;
+const PROJECTILE_BOTTOM_OFFSET_Y = 45;
+
+const IMG_LAYER_FULL_WIDTH = 1768;
+const IMG_LAYER_FULL_HEIGHT = 500;
+const IMG_PLAYER_FULL_WIDTH = 4680;
+const IMG_PLAYER_FULL_HEIGHT = 380;
+const IMG_ANGLER1_FULL_WIDTH = 8892;
+const IMG_ANGLER1_FULL_HEIGHT = 507;
+const IMG_ANGLER2_FULL_WIDTH = 8307;
+const IMG_ANGLER2_FULL_HEIGHT = 337;
+const IMG_LUCKY_FULL_WIDTH = 3861;
+const IMG_LUCKY_FULL_HEIGHT = 190;
+
+const AMMO_INCREASE_INTERVAL_MS = 1500;
+const AMMO_MAX_AMOUNT = 15;
+
+const POWERUP_DURATION_MS = 5000;
+const POWERUP_AMMO_INCREMENT = 0.1;
+
+const DISPLAY_FONT_FAMILY = "Special Elite";
+const DISPLAY_FONT_SIZE = 16;
+const DISPLAY_COLOR = "white";
+const DISPLAY_SCORE_OFFSET_X = 20;
+const DISPLAY_SCORE_OFFSET_Y = 20;
+const DISPLAY_TIMER_OFFSET_X = 20;
+const DISPLAY_TIMER_OFFSET_Y = 40;
+const DISPLAY_TIMER_DANGER_COLOR = "red";
+const DISPLAY_AMMO_OFFSET_X = 22;
+const DISPLAY_AMMO_OFFSET_Y = 50;
+const DISPLAY_AMMO_WIDTH = 2;
+const DISPLAY_AMMO_HEIGHT = 15;
+const DISPLAY_AMMO_SPACING = 5;
+const DISPLAY_AMMO_POWERUP_COLOR = "#ffffbd";
+const DISPLAY_GAMEOVER_TEXT_OFFSET_Y = 20;
+
+const GAMEOVER_MSG_WIN_MAIN_TEXT = "You Rock!";
+const GAMEOVER_MSG_WIN_SEC_TEXT = "You won the game!";
+const GAMEOVER_MSG_LOSS_MAIN_TEXT = "Bummer!";
+const GAMEOVER_MSG_LOSS_SEC_TEXT = "Better luck next time!";
+
+const WINNING_SCORE = 30;
+const GAME_TIME_MAX_MS = 30000;
+
+const KEY_ARROW_DOWN = "ArrowDown";
+const KEY_ARROW_UP = "ArrowUp";
+const KEY_SPACEBAR = " ";
+const KEY_DEBUG = "d";
+
+window.addEventListener("load", () => {
+	const canvas = document.getElementById("canvas");
+	canvas.width = CANVAS_WIDTH;
+	canvas.height = CANVAS_HEIGHT;
+	const context = canvas.getContext("2d");
+
+	class InputHandler {
+		constructor(game) {
+			this.game = game;
+			document.addEventListener("keydown", (e) => {
+				if (
+					!this.game.keys.includes(e.key) &&
+					(e.key === KEY_ARROW_DOWN || e.key === KEY_ARROW_UP)
+				) {
+					this.game.keys.push(e.key);
+				} else if (e.key === KEY_SPACEBAR) {
+					this.game.player.shoot();
+				} else if (e.key === KEY_DEBUG) {
+					this.game.debugMode = !this.game.debugMode;
+				}
+			});
+
+			document.addEventListener("keyup", (e) => {
+				if (this.game.keys.includes(e.key)) {
+					this.game.keys = this.game.keys.filter((key) => key !== e.key);
+				}
+			});
+		}
+	}
+
+	class Projectile {
+		constructor(game, x, y) {
+			this.game = game;
+			this.x = x + PROJECTILE_OFFSET_X;
+			this.y = y + PROJECTILE_TOP_OFFSET_Y;
+			this.width = PROJECTILE_WIDTH;
+			this.height = PROJECTILE_HEIGHT;
+			this.speedX = 1;
+			this.markedForDeletion = false;
+			this.image = document.getElementById("imgProjectile");
+		}
+		update() {
+			this.x += this.speedX;
+			if (this.x > this.game.width * 0.9) {
+				// don't delete enemies just at the right edge of canvas
+				this.markedForDeletion = true;
+			}
+		}
+		draw(context) {
+			context.fillStyle = "yellow";
+			context.drawImage(this.image, this.x, this.y);
+		}
+	}
+
+	class Player {
+		constructor(game) {
+			this.game = game;
+			this.width = PLAYER_WIDTH;
+			this.height = PLAYER_HEIGHT;
+			this.x = PLAYER_OFFSET_X;
+			this.y = this.game.height / 3;
+			this.speedY = PLAYER_SPEED;
+
+			this.image = document.getElementById("imgPlayer");
+			this.currentFrameX = 0;
+			this.currentFrameY = 0;
+			this.totalFramesX = IMG_PLAYER_FULL_WIDTH / this.width;
+			this.totalFramesY = IMG_PLAYER_FULL_HEIGHT / this.height;
+
+			this.projectiles = [];
+
+			this.poweredUp = false;
+			this.poweredUpTimer = 0;
+		}
+
+		update(deltaTime) {
+			this.#handleKeyPress();
+			this.#updateImage();
+			this.#updateProjectiles();
+			this.#updatePoweredUp(deltaTime);
+		}
+
+		draw(context) {
+			context.fillStyle = "black";
+
+			this.#drawImage();
+			this.#drawProjectiles();
+		}
+
+		shoot() {
+			if (this.game.ammo > 0) {
+				this.projectiles.push(new Projectile(this.game, this.x, this.y));
+				if (this.poweredUp) {
+					this.projectiles.push(
+						new Projectile(
+							this.game,
+							this.x,
+							this.y + this.height - PROJECTILE_BOTTOM_OFFSET_Y
+						)
+					);
+				}
+				this.game.ammo--;
+			}
+		}
+
+		powerUp() {
+			this.poweredUp = true;
+			this.poweredUpTimer = 0;
+			this.game.ammo = this.game.maxAmmo;
+		}
+
+		#handleKeyPress() {
+			const canGoUp = this.y > -this.height / 2;
+			const canGoDown = this.y < this.game.height - this.height / 2;
+
+			if (canGoUp && this.game.keys.includes(KEY_ARROW_UP))
+				this.y += -this.speedY;
+			else if (canGoDown && this.game.keys.includes(KEY_ARROW_DOWN))
+				this.y += this.speedY;
+			else if (this.game.keys.includes(KEY_SPACEBAR)) {
+				this.shoot();
+			}
+		}
+
+		#updateImage() {
+			this.currentFrameX += 1;
+			if (this.currentFrameX >= this.totalFramesX) {
+				this.currentFrameX = 0;
+			}
+		}
+
+		#drawImage() {
+			if (this.game.debugMode) {
+				context.strokeRect(this.x, this.y, this.width, this.height);
+			}
+			context.drawImage(
+				this.image,
+				this.currentFrameX * this.width,
+				this.currentFrameY * this.height,
+				this.width,
+				this.height,
+				this.x,
+				this.y,
+				this.width,
+				this.height
+			);
+		}
+
+		#updateProjectiles() {
+			this.projectiles.forEach((projectile) => {
+				projectile.update(context);
+			});
+			this.projectiles = this.projectiles.filter(
+				(projectile) => !projectile.markedForDeletion
+			);
+		}
+
+		#drawProjectiles() {
+			this.projectiles.forEach((projectile) => {
+				projectile.draw(context);
+			});
+		}
+
+		#updatePoweredUp(deltaTime) {
+			if (this.poweredUp) {
+				this.poweredUpTimer += deltaTime;
+				this.currentFrameY = 1;
+				this.game.ammo += POWERUP_AMMO_INCREMENT;
+				if (this.poweredUpTimer > POWERUP_DURATION_MS) {
+					this.poweredUp = false;
+				}
+			}
+
+			if (!this.poweredUp) {
+				this.poweredUpTimer = 0;
+				this.currentFrameY = 0;
+			}
+		}
+	}
+
+	class Enemy {
+		constructor(game) {
+			this.game = game;
+			this.x = this.game.width;
+			this.speedX = -0.5 - Math.random() * 1.5; // speed -0.5 -> -2
+			this.markedForDeletion = false;
+		}
+
+		update() {
+			this.x += this.speedX;
+			if (this.x + this.width < 0) this.markedForDeletion = true;
+
+			this.currentFrameX += 1;
+			if (this.currentFrameX >= this.totalFramesX) this.currentFrameX = 0;
+		}
+
+		draw(context) {
+			if (this.game.debugMode) {
+				context.fillStyle = "red";
+				context.fillText(
+					this.lives,
+					this.x,
+					this.y - 5,
+					this.width,
+					this.height
+				);
+				context.fillRect(this.x, this.y, this.width, this.height);
+			}
+			context.drawImage(
+				this.image,
+				this.currentFrameX * this.width,
+				this.currentFrameY * this.height,
+				this.width,
+				this.height,
+				this.x,
+				this.y,
+				this.width,
+				this.height
+			);
+		}
+	}
+
+	class Angler1 extends Enemy {
+		constructor(game) {
+			super(game);
+			this.type = ENEMY_TYPE_ANGLER;
+			this.width = ENEMY_ANGLER1_WIDTH;
+			this.height = ENEMY_ANGLER1_HEIGHT;
+			this.y = Math.random() * (this.game.height - this.height);
+
+			this.lives = ENEMY_ANGLER1_LIVES;
+			this.points = ENEMY_ANGLER1_POINTS;
+
+			this.image = document.getElementById("imgAngler1");
+			this.totalFramesX = IMG_ANGLER1_FULL_WIDTH / this.width;
+			this.totalFramesY = IMG_ANGLER1_FULL_HEIGHT / this.height;
+			this.currentFrameX = 0;
+			this.currentFrameY = Math.floor(Math.random() * this.totalFramesY);
+		}
+	}
+
+	class Angler2 extends Enemy {
+		constructor(game) {
+			super(game);
+			this.type = ENEMY_TYPE_ANGLER;
+			this.width = ENEMY_ANGLER2_WIDTH;
+			this.height = ENEMY_ANGLER2_HEIGHT;
+			this.y = Math.random() * (this.game.height - this.height);
+
+			this.lives = ENEMY_ANGLER2_LIVES;
+			this.points = ENEMY_ANGLER2_POINTS;
+
+			this.image = document.getElementById("imgAngler2");
+			this.totalFramesX = IMG_ANGLER2_FULL_WIDTH / this.width;
+			this.totalFramesY = IMG_ANGLER2_FULL_HEIGHT / this.height;
+			this.currentFrameX = 0;
+			this.currentFrameY = Math.floor(Math.random() * this.totalFramesY);
+		}
+	}
+
+	class Lucky extends Enemy {
+		constructor(game) {
+			super(game);
+			this.type = ENEMY_TYPE_LUCKY;
+			this.width = ENEMY_LUCKY_WIDTH;
+			this.height = ENEMY_LUCKY_HEIGHT;
+			this.y = Math.random() * (this.game.height - this.height);
+
+			this.lives = ENEMY_LUCKY_LIVES;
+			this.points = ENEMY_LUCKY_POINTS;
+
+			this.image = document.getElementById("imgLucky");
+			this.totalFramesX = IMG_LUCKY_FULL_WIDTH / this.width;
+			this.totalFramesY = IMG_LUCKY_FULL_HEIGHT / this.height;
+			this.currentFrameX = 0;
+			this.currentFrameY = Math.floor(Math.random()) * 2;
+		}
+	}
+
+	class Layer {
+		constructor(game, image, speedX) {
+			this.game = game;
+			this.image = image;
+			this.speedX = -speedX;
+			this.width = IMG_LAYER_FULL_WIDTH;
+			this.height = IMG_LAYER_FULL_HEIGHT;
+			this.x = 0;
+			this.y = 0;
+		}
+		update() {
+			this.x += this.speedX; // may need a multiplier with game speed in power up mode
+			if (this.x < -this.width) this.x = 0;
+		}
+		draw(context) {
+			context.drawImage(this.image, this.x, this.y);
+			context.drawImage(this.image, this.x + this.width, this.y);
+		}
+	}
+
+	class Background {
+		constructor(game) {
+			this.game = game;
+
+			this.layer1 = new Layer(
+				this.game,
+				document.getElementById("imgLayer1"),
+				0.2
+			);
+			this.layer2 = new Layer(
+				this.game,
+				document.getElementById("imgLayer2"),
+				0.3
+			);
+			this.layer3 = new Layer(
+				this.game,
+				document.getElementById("imgLayer3"),
+				1
+			);
+			this.layer4 = new Layer(
+				this.game,
+				document.getElementById("imgLayer4"),
+				1.3
+			);
+			this.layers = [this.layer1, this.layer2, this.layer3];
+		}
+
+		update() {
+			this.layers.forEach((layer) => {
+				layer.update();
+			});
+		}
+
+		draw(context) {
+			this.layers.forEach((layer) => {
+				layer.draw(context);
+			});
+		}
+	}
+
+	class UI {
+		constructor(game) {
+			this.game = game;
+
+			this.fontFamily = DISPLAY_FONT_FAMILY;
+			this.color = DISPLAY_COLOR;
+			this.fontSize = DISPLAY_FONT_SIZE;
+		}
+
+		draw(context) {
+			context.font = `${this.fontSize}px ${this.fontFamily}`;
+			context.fillStyle = this.color;
+
+			context.save();
+			context.shadowColor = "black";
+			context.shadowOffsetX = 2;
+			context.shadowOffsetY = 2;
+
+			this.#drawScore(context);
+			this.#drawTimer(context);
+			this.#drawAmmo(context);
+			this.#drawGameOver(context);
+
+			context.restore();
+		}
+
+		#drawScore(context) {
+			context.fillText(
+				`Score: ${this.game.score}`,
+				DISPLAY_SCORE_OFFSET_X,
+				DISPLAY_SCORE_OFFSET_Y,
+				this.game.width,
+				this.game.height
+			);
+		}
+
+		#drawGameOver(context) {
+			if (!this.game.gameOver) return;
+
+			let mainText;
+			let secText;
+
+			if (this.game.score >= this.game.winningScore) {
+				mainText = GAMEOVER_MSG_WIN_MAIN_TEXT;
+				secText = GAMEOVER_MSG_WIN_SEC_TEXT;
+			} else {
+				mainText = GAMEOVER_MSG_LOSS_MAIN_TEXT;
+				secText = GAMEOVER_MSG_LOSS_SEC_TEXT;
+			}
+
+			context.textAlign = "center";
+			context.fillStyle = this.color;
+
+			context.font = `60px ${this.fontFamily}`;
+			context.fillText(
+				mainText,
+				this.game.width / 2,
+				this.game.height / 2 - DISPLAY_GAMEOVER_TEXT_OFFSET_Y,
+				this.game.width,
+				this.game.height
+			);
+
+			context.font = `20px ${this.fontFamily}`;
+			context.fillText(
+				secText,
+				this.game.width / 2,
+				this.game.height / 2 + DISPLAY_GAMEOVER_TEXT_OFFSET_Y,
+				this.game.width,
+				this.game.height
+			);
+		}
+
+		#drawTimer(context) {
+			let timeLeftMs = this.game.maxGameTime - this.game.gameTimer;
+			if (timeLeftMs < 0) timeLeftMs = 0;
+
+			if (timeLeftMs < this.game.maxGameTime * 0.2) {
+				context.fillStyle = DISPLAY_TIMER_DANGER_COLOR;
+			}
+
+			const formattedTime = (timeLeftMs / 1000).toFixed(1);
+			context.fillText(
+				`Time left: ${formattedTime}s`,
+				DISPLAY_TIMER_OFFSET_X,
+				DISPLAY_TIMER_OFFSET_Y,
+				this.game.width,
+				this.game.height
+			);
+		}
+
+		#drawAmmo(context) {
+			if (this.game.player.poweredUp)
+				context.fillStyle = DISPLAY_AMMO_POWERUP_COLOR;
+			else context.fillStyle = this.color;
+
+			for (let i = 0; i < this.game.ammo; i++) {
+				context.fillRect(
+					DISPLAY_AMMO_OFFSET_X + DISPLAY_AMMO_SPACING * i,
+					DISPLAY_AMMO_OFFSET_Y,
+					DISPLAY_AMMO_WIDTH,
+					DISPLAY_AMMO_HEIGHT
+				);
+			}
+		}
+	}
+
+	class Game {
+		constructor(width, height) {
+			this.width = width;
+			this.height = height;
+			this.gameOver = false;
+			this.debugMode = false;
+
+			this.player = new Player(this);
+			this.inputHandler = new InputHandler(this);
+			this.ui = new UI(this);
+			this.background = new Background(this);
+
+			this.keys = [];
+			this.enemies = [];
+
+			this.score = 0;
+			this.ammo = 10;
+
+			this.gameTimer = 0;
+			this.ammoTimer = 0;
+			this.enemyTimer = 0;
+
+			this.winningScore = WINNING_SCORE;
+			this.maxGameTime = GAME_TIME_MAX_MS;
+			this.maxAmmo = AMMO_MAX_AMOUNT;
+		}
+
+		update(deltaTime) {
+			if (this.gameTimer > this.maxGameTime) this.gameOver = true;
+
+			if (!this.gameOver) {
+				this.gameTimer += deltaTime;
+				this.background.update();
+				this.player.update(deltaTime);
+				this.#updateAmmo(deltaTime);
+				this.#updateEnemies(deltaTime);
+				this.background.layer4.update();
+			}
+		}
+
+		draw() {
+			this.background.draw(context);
+			this.player.draw(context);
+			this.#drawEnemies(context);
+			this.ui.draw(context);
+			this.background.layer4.draw(context);
+		}
+
+		checkCollision(rect1, rect2) {
+			return (
+				rect1.x < rect2.x + rect2.width &&
+				rect2.x < rect1.x + rect1.width &&
+				rect1.y < rect2.y + rect2.height &&
+				rect2.y < rect1.y + rect1.height
+			);
+		}
+
+		#updateAmmo(deltaTime) {
+			if (this.ammoTimer > AMMO_INCREASE_INTERVAL_MS) {
+				this.ammoTimer = 0;
+				if (this.ammo < AMMO_MAX_AMOUNT) this.ammo++;
+			} else {
+				this.ammoTimer += deltaTime;
+			}
+		}
+
+		#updateEnemies(deltaTime) {
+			this.enemies.forEach((enemy) => {
+				enemy.update();
+				this.#handleEnemyPlayerCollision(enemy);
+				this.#handleEnemyProjectilesCollision(enemy);
+			});
+			this.enemies = this.enemies.filter((enemy) => !enemy.markedForDeletion);
+
+			if (this.enemyTimer > ENEMY_SPAWN_INTERVAL_MS) {
+				this.enemyTimer = 0;
+				this.#addEnemy();
+			} else {
+				this.enemyTimer += deltaTime;
+			}
+		}
+
+		#drawEnemies(context) {
+			this.enemies.forEach((enemy) => {
+				enemy.draw(context);
+			});
+		}
+
+		#addEnemy() {
+			let EnemyClass;
+			const seed = Math.random();
+
+			if (seed < 0.3) EnemyClass = Lucky;
+			else if (seed < 0.6) EnemyClass = Angler2;
+			else EnemyClass = Angler1;
+
+			this.enemies.push(new EnemyClass(this));
+		}
+
+		#handleEnemyPlayerCollision(enemy) {
+			if (this.checkCollision(this.player, enemy)) {
+				enemy.markedForDeletion = true;
+				if (enemy.type === ENEMY_TYPE_LUCKY) {
+					this.player.powerUp();
+				} else if (this.score > 0) {
+					this.score--;
+				}
+			}
+		}
+
+		#handleEnemyProjectilesCollision(enemy) {
+			this.player.projectiles.forEach((projectile) => {
+				if (this.checkCollision(projectile, enemy)) {
+					projectile.markedForDeletion = true;
+
+					enemy.lives--;
+					if (enemy.lives === 0) {
+						enemy.markedForDeletion = true;
+						this.score += enemy.points;
+					}
+				}
+			});
+		}
+	}
+
+	function startGame() {
+		const game = new Game(CANVAS_WIDTH, CANVAS_HEIGHT);
+		let lastTime = 0;
+
+		function animate(currentTime) {
+			const deltaTime = currentTime - lastTime;
+			lastTime = currentTime;
+
+			context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+			game.update(deltaTime);
+			game.draw();
+			requestAnimationFrame(animate);
+		}
+		animate(0);
+	}
+
+	startGame();
+});
