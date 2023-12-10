@@ -162,6 +162,8 @@ const GAME_TIME_MAX_MS = 30000;
 
 const KEY_ARROW_DOWN = "ArrowDown";
 const KEY_ARROW_UP = "ArrowUp";
+const KEY_ARROW_LEFT = "ArrowLeft";
+const KEY_ARROW_RIGHT = "ArrowRight";
 const KEY_SPACEBAR = " ";
 const KEY_DEBUG = "d";
 
@@ -183,7 +185,10 @@ window.addEventListener("load", () => {
 			document.addEventListener("keydown", (e) => {
 				if (
 					!this.game.keys.includes(e.key) &&
-					(e.key === KEY_ARROW_DOWN || e.key === KEY_ARROW_UP)
+					(e.key === KEY_ARROW_DOWN ||
+						e.key === KEY_ARROW_UP ||
+						e.key === KEY_ARROW_RIGHT ||
+						e.key === KEY_ARROW_LEFT)
 				) {
 					this.game.keys.push(e.key);
 				} else if (e.key === KEY_SPACEBAR) {
@@ -368,6 +373,7 @@ window.addEventListener("load", () => {
 			this.x = PLAYER_OFFSET_X;
 			this.y = this.game.height / 3;
 			this.speedY = PLAYER_SPEED;
+			this.speedX = PLAYER_SPEED;
 
 			this.image = document.getElementById("imgPlayer");
 			this.currentFrameX = 0;
@@ -428,14 +434,18 @@ window.addEventListener("load", () => {
 		#handleKeyPress() {
 			const canGoUp = this.y > -this.height / 2;
 			const canGoDown = this.y < this.game.height - this.height / 2;
+			const canGoLeft = this.x > 0;
+			const canGoRight = this.x + this.width < this.game.width / 2;
 
 			if (canGoUp && this.game.keys.includes(KEY_ARROW_UP))
 				this.y += -this.speedY;
 			else if (canGoDown && this.game.keys.includes(KEY_ARROW_DOWN))
 				this.y += this.speedY;
-			else if (this.game.keys.includes(KEY_SPACEBAR)) {
-				this.shoot();
-			}
+
+			if (canGoLeft && this.game.keys.includes(KEY_ARROW_LEFT))
+				this.x += -this.speedX;
+			else if (canGoRight && this.game.keys.includes(KEY_ARROW_RIGHT))
+				this.x += this.speedX;
 		}
 
 		#updateImage() {
