@@ -4,10 +4,11 @@
  *
  */
 
-/* Canvas */
+/* General */
 
 const CANVAS_WIDTH = 500;
 const CANVAS_HEIGHT = 500;
+const ONE_SECOND_MS = 1000;
 
 /* Player */
 
@@ -107,6 +108,8 @@ const IMG_FIREBALL_FULL_HEIGHT = 20;
 const IMG_FIREBALL_FULL_WIDTH = 145;
 const IMG_EXPLOSION_FULL_HEIGHT = 200;
 const IMG_EXPLOSION_FULL_WIDTH = 1600;
+const IMG_SHIELD_FULL_HEIGHT = 190;
+const IMG_SHIELD_FULL_WIDTH = 2880;
 
 /* Particles */
 
@@ -253,7 +256,7 @@ window.addEventListener("load", () => {
 
 			this.fps = 20;
 			this.timer = 0;
-			this.interval = 1000 / this.fps;
+			this.interval = ONE_SECOND_MS / this.fps;
 		}
 		update(deltaTime) {
 			this.x += this.speedX;
@@ -670,56 +673,6 @@ window.addEventListener("load", () => {
 		}
 	}
 
-	class Explosion {
-		constructor(game, x, y, size) {
-			this.game = game;
-			this.x = x;
-			this.y = y;
-			this.size = size;
-
-			this.currentFrameX = 0;
-			this.currentFrameY = 0;
-			this.totalFramesX = IMG_EXPLOSION_FULL_WIDTH / this.size;
-
-			this.timer = 0;
-			this.fps = 15;
-			this.interval = 1000 / this.fps;
-
-			this.markedForDeletion = false;
-		}
-
-		update(deltaTime) {
-			if (this.timer > this.interval) {
-				this.timer = 0;
-				if (this.currentFrameX < this.totalFramesX) this.currentFrameX++;
-				else this.markedForDeletion = true;
-			} else {
-				this.timer += deltaTime;
-			}
-		}
-
-		draw(context) {
-			context.drawImage(
-				this.image,
-				this.currentFrameX * ENEMY_EXPLOSION_WIDTH,
-				this.currentFrameY,
-				ENEMY_EXPLOSION_WIDTH,
-				ENEMY_EXPLOSION_HEIGHT,
-				this.x,
-				this.y,
-				this.size,
-				this.size
-			);
-		}
-	}
-
-	class SmokeExplosion extends Explosion {
-		constructor(game, x, y, size) {
-			super(game, x, y, size);
-			this.image = document.getElementById("imgSmokeExplosion");
-		}
-	}
-
 	class BulbWhale extends Enemy {
 		constructor(game) {
 			super(game);
@@ -759,10 +712,110 @@ window.addEventListener("load", () => {
 		}
 	}
 
+	class Explosion {
+		constructor(game, x, y, size) {
+			this.game = game;
+			this.x = x;
+			this.y = y;
+			this.size = size;
+
+			this.currentFrameX = 0;
+			this.currentFrameY = 0;
+			this.totalFramesX = IMG_EXPLOSION_FULL_WIDTH / this.size;
+
+			this.timer = 0;
+			this.fps = 15;
+			this.interval = ONE_SECOND_MS / this.fps;
+
+			this.markedForDeletion = false;
+		}
+
+		update(deltaTime) {
+			if (this.timer > this.interval) {
+				this.timer = 0;
+				if (this.currentFrameX < this.totalFramesX) this.currentFrameX++;
+				else this.markedForDeletion = true;
+			} else {
+				this.timer += deltaTime;
+			}
+		}
+
+		draw(context) {
+			context.drawImage(
+				this.image,
+				this.currentFrameX * ENEMY_EXPLOSION_WIDTH,
+				this.currentFrameY,
+				ENEMY_EXPLOSION_WIDTH,
+				ENEMY_EXPLOSION_HEIGHT,
+				this.x,
+				this.y,
+				this.size,
+				this.size
+			);
+		}
+	}
+
+	class SmokeExplosion extends Explosion {
+		constructor(game, x, y, size) {
+			super(game, x, y, size);
+			this.image = document.getElementById("imgSmokeExplosion");
+		}
+	}
+
 	class FireExplosion extends Explosion {
 		constructor(game, x, y, size) {
 			super(game, x, y, size);
 			this.image = document.getElementById("imgFireExplosion");
+		}
+	}
+
+	class Shield {
+		constructor(game) {
+			this.game = game;
+			this.width = PLAYER_WIDTH;
+			this.height = PLAYER_HEIGHT;
+
+			this.totalFramesX = IMG_SHIELD_FULL_WIDTH / this.width;
+			this.currentFrameY = 0;
+			this.currentFrameX = 0;
+
+			this.timer = 0;
+			this.fps = 40;
+			this.interval = ONE_SECOND_MS / this.fps;
+			this.image = document.getElementById("imgShield");
+
+			this.visible = false;
+		}
+
+		update(deltaTime) {
+			if (this.currentFrameX < this.totalFramesX) {
+				if (this.timer < this.interval) {
+					this.timer += deltaTime;
+				} else {
+					this.timer = 0;
+					this.currentFrameX++;
+				}
+			}
+		}
+
+		draw(context) {
+			if (this.currentFrameX < this.totalFramesX) {
+				context.drawImage(
+					this.image,
+					this.currentFrameX * this.width,
+					this.currentFrameY,
+					this.width,
+					this.height,
+					this.game.player.x,
+					this.game.player.y,
+					this.game.player.width,
+					this.game.player.height
+				);
+			}
+		}
+
+		hit() {
+			this.currentFrameX = 0;
 		}
 	}
 
@@ -906,7 +959,7 @@ window.addEventListener("load", () => {
 				context.fillStyle = DISPLAY_TIMER_DANGER_COLOR;
 			}
 
-			const formattedTime = (timeLeftMs / 1000).toFixed(1);
+			const formattedTime = (timeLeftMs / ONE_SECOND_MS).toFixed(1);
 			context.fillText(
 				`Time left: ${formattedTime}s`,
 				DISPLAY_TIMER_OFFSET_X,
@@ -942,6 +995,7 @@ window.addEventListener("load", () => {
 
 			this.sound = new SoundController(this);
 			this.player = new Player(this);
+			this.shield = new Shield(this);
 			this.inputHandler = new InputHandler(this);
 			this.ui = new UI(this);
 			this.background = new Background(this);
@@ -970,6 +1024,7 @@ window.addEventListener("load", () => {
 				this.gameTimer += deltaTime;
 				this.background.update();
 				this.player.update(deltaTime);
+				this.shield.update(deltaTime);
 				this.#updateAmmo(deltaTime);
 				this.#updateExplosions(deltaTime);
 				this.#updateEnemies(deltaTime);
@@ -981,6 +1036,7 @@ window.addEventListener("load", () => {
 		draw() {
 			this.background.draw(context);
 			this.player.draw(context);
+			this.shield.draw(context);
 			this.#drawParticles(context);
 			this.#drawEnemies(context);
 			this.#drawExplosions(context);
@@ -1060,6 +1116,7 @@ window.addEventListener("load", () => {
 				} else if (this.score > 0) {
 					this.score--;
 				}
+				this.shield.hit();
 				this.sound.playPoof();
 				this.#addParticles(enemy, ENEMY_DESTROYED_PARTICLES_AMOUNT);
 				this.explosions.push(
