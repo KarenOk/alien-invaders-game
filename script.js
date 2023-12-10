@@ -6,7 +6,7 @@
 
 /* General */
 
-const CANVAS_WIDTH = 500;
+const CANVAS_WIDTH = 1000;
 const CANVAS_HEIGHT = 500;
 const ONE_SECOND_MS = 1000;
 
