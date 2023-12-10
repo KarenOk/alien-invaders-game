@@ -39,10 +39,28 @@ const ENEMY_DRONE_WIDTH = 115;
 const ENEMY_DRONE_HEIGHT = 95;
 const ENEMY_DRONE_LIVES = 1;
 const ENEMY_DRONE_POINTS = ENEMY_DRONE_LIVES;
+const ENEMY_BULBWHALE_WIDTH = 270;
+const ENEMY_BULBWHALE_HEIGHT = 219;
+const ENEMY_BULBWHALE_LIVES = 20;
+const ENEMY_BULBWHALE_POINTS = ENEMY_BULBWHALE_LIVES;
+const ENEMY_MOONFISH_WIDTH = 227;
+const ENEMY_MOONFISH_HEIGHT = 240;
+const ENEMY_MOONFISH_LIVES = 10;
+const ENEMY_MOONFISH_POINTS = ENEMY_MOONFISH_LIVES;
+const ENEMY_STALKER_WIDTH = 243;
+const ENEMY_STALKER_HEIGHT = 123;
+const ENEMY_STALKER_LIVES = 5;
+const ENEMY_STALKER_POINTS = ENEMY_STALKER_LIVES;
+const ENEMY_RAZORFIN_WIDTH = 187;
+const ENEMY_RAZORFIN_HEIGHT = 149;
+const ENEMY_RAZORFIN_LIVES = 5;
+const ENEMY_RAZORFIN_POINTS = ENEMY_RAZORFIN_LIVES;
+
 const ENEMY_SPAWN_INTERVAL_MS = 3000;
 const ENEMY_TYPE_ANGLER = "angler";
 const ENEMY_TYPE_LUCKY = "lucky";
 const ENEMY_TYPE_HIVEWHALE = "hivewhale";
+const ENEMY_TYPE_MOONFISH = "moonfish";
 const ENEMY_DESTROYED_PARTICLES_AMOUNT = 3;
 const ENEMY_HIT_PARTICLES_AMOUNT = 1;
 const ENEMY_EXPLOSION_WIDTH = 200;
@@ -75,8 +93,16 @@ const IMG_HIVEWHALE_FULL_WIDTH = 15600;
 const IMG_HIVEWHALE_FULL_HEIGHT = 227;
 const IMG_DRONE_FULL_WIDTH = 4485;
 const IMG_DRONE_FULL_HEIGHT = 190;
-const IMG_PARTICLES_FULL_HEIGHT = 150;
+const IMG_BULBWHALE_FULL_WIDTH = 10530;
+const IMG_BULBWHALE_FULL_HEIGHT = 438;
+const IMG_MOONFISH_FULL_WIDTH = 8853;
+const IMG_MOONFISH_FULL_HEIGHT = 240;
+const IMG_STALKER_FULL_WIDTH = 9477;
+const IMG_STALKER_FULL_HEIGHT = 123;
+const IMG_RAZORFIN_FULL_WIDTH = 7293;
+const IMG_RAZORFIN_FULL_HEIGHT = 149;
 const IMG_PARTICLES_FULL_WIDTH = 150;
+const IMG_PARTICLES_FULL_HEIGHT = 150;
 const IMG_FIREBALL_FULL_HEIGHT = 20;
 const IMG_FIREBALL_FULL_WIDTH = 145;
 const IMG_EXPLOSION_FULL_HEIGHT = 200;
@@ -502,6 +528,44 @@ window.addEventListener("load", () => {
 		}
 	}
 
+	class RazorFin extends Enemy {
+		constructor(game) {
+			super(game);
+			this.width = ENEMY_RAZORFIN_WIDTH;
+			this.height = ENEMY_RAZORFIN_HEIGHT;
+			this.y = Math.random() * (this.game.height - this.height);
+			this.speedX = Math.random() * -1 - 1; // speed: -1 -> -2
+
+			this.lives = ENEMY_RAZORFIN_LIVES;
+			this.points = ENEMY_RAZORFIN_POINTS;
+
+			this.image = document.getElementById("imgRazorFin");
+			this.totalFramesX = IMG_RAZORFIN_FULL_WIDTH / this.width;
+			this.totalFramesY = IMG_RAZORFIN_FULL_HEIGHT / this.height;
+			this.currentFrameX = 0;
+			this.currentFrameY = 0;
+		}
+	}
+
+	class Stalker extends Enemy {
+		constructor(game) {
+			super(game);
+			this.width = ENEMY_STALKER_WIDTH;
+			this.height = ENEMY_STALKER_HEIGHT;
+			this.y = Math.random() * (this.game.height - this.height);
+			this.speedX = Math.random() * -1 - 1; // speed: -1 -> -2
+
+			this.lives = ENEMY_STALKER_LIVES;
+			this.points = ENEMY_STALKER_POINTS;
+
+			this.image = document.getElementById("imgStalker");
+			this.totalFramesX = IMG_STALKER_FULL_WIDTH / this.width;
+			this.totalFramesY = IMG_STALKER_FULL_HEIGHT / this.height;
+			this.currentFrameX = 0;
+			this.currentFrameY = 0;
+		}
+	}
+
 	class Lucky extends Enemy {
 		constructor(game) {
 			super(game);
@@ -608,6 +672,45 @@ window.addEventListener("load", () => {
 		constructor(game, x, y, size) {
 			super(game, x, y, size);
 			this.image = document.getElementById("imgSmokeExplosion");
+		}
+	}
+
+	class BulbWhale extends Enemy {
+		constructor(game) {
+			super(game);
+			this.width = ENEMY_BULBWHALE_WIDTH;
+			this.height = ENEMY_BULBWHALE_HEIGHT;
+			this.y = Math.random() * (this.game.height - this.height);
+			this.speedX = Math.random() * -1.2 - 0.2; // speed: -0.2 -> -1.2
+
+			this.lives = ENEMY_BULBWHALE_LIVES;
+			this.points = ENEMY_BULBWHALE_POINTS;
+
+			this.image = document.getElementById("imgBulbWhale");
+			this.totalFramesX = IMG_BULBWHALE_FULL_WIDTH / this.width;
+			this.totalFramesY = IMG_BULBWHALE_FULL_HEIGHT / this.height;
+			this.currentFrameX = 0;
+			this.currentFrameY = 0;
+		}
+	}
+
+	class MoonFish extends Enemy {
+		constructor(game) {
+			super(game);
+			this.type = ENEMY_TYPE_MOONFISH;
+			this.width = ENEMY_MOONFISH_WIDTH;
+			this.height = ENEMY_MOONFISH_HEIGHT;
+			this.y = Math.random() * (this.game.height - this.height);
+			this.speedX = Math.random() * -1.2 - 2; // speed: -2 -> -3.2
+
+			this.lives = ENEMY_MOONFISH_LIVES;
+			this.points = ENEMY_MOONFISH_POINTS;
+
+			this.image = document.getElementById("imgMoonFish");
+			this.totalFramesX = IMG_MOONFISH_FULL_WIDTH / this.width;
+			this.totalFramesY = IMG_MOONFISH_FULL_HEIGHT / this.height;
+			this.currentFrameX = 0;
+			this.currentFrameY = 0;
 		}
 	}
 
@@ -883,10 +986,14 @@ window.addEventListener("load", () => {
 			let EnemyClass;
 			const seed = Math.random();
 
-			if (seed < 0.3) EnemyClass = Lucky;
-			else if (seed < 0.6) EnemyClass = Angler2;
-			else if (seed < 0.8) EnemyClass = HiveWhale;
-			else EnemyClass = Angler1;
+			if (seed < 0.2) EnemyClass = Angler1;
+			else if (seed < 0.4) EnemyClass = Angler2;
+			else if (seed < 0.5) EnemyClass = RazorFin;
+			else if (seed < 0.6) EnemyClass = Stalker;
+			else if (seed < 0.7) EnemyClass = HiveWhale;
+			else if (seed < 0.8) EnemyClass = BulbWhale;
+			else if (seed < 0.9) EnemyClass = MoonFish;
+			else EnemyClass = Lucky;
 
 			this.enemies.push(new EnemyClass(this));
 		}
@@ -935,6 +1042,8 @@ window.addEventListener("load", () => {
 						);
 						if (enemy.type === ENEMY_TYPE_HIVEWHALE) {
 							this.#addDrones(enemy);
+						} else if (enemy.type === ENEMY_TYPE_MOONFISH) {
+							this.player.powerUp();
 						}
 					} else {
 						this.#addParticles(enemy, ENEMY_HIT_PARTICLES_AMOUNT);
