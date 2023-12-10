@@ -23,12 +23,15 @@ const ENEMY_SPAWN_INTERVAL_MS = 3000;
 const ENEMY_MAX_SPEED = 2;
 const ENEMY_TYPE_ANGLER = "angler";
 const ENEMY_TYPE_LUCKY = "lucky";
+const ENEMY_DESTROYED_PARTICLES_AMOUNT = 3;
+const ENEMY_HIT_PARTICLES_AMOUNT = 1;
 
 const PROJECTILE_WIDTH = 28;
 const PROJECTILE_HEIGHT = 10;
 const PROJECTILE_OFFSET_X = 98;
 const PROJECTILE_TOP_OFFSET_Y = 28;
 const PROJECTILE_BOTTOM_OFFSET_Y = 45;
+const PROJECTILE_SPEED = 6;
 
 const IMG_LAYER_FULL_WIDTH = 1768;
 const IMG_LAYER_FULL_HEIGHT = 500;
@@ -40,6 +43,15 @@ const IMG_ANGLER2_FULL_WIDTH = 8307;
 const IMG_ANGLER2_FULL_HEIGHT = 337;
 const IMG_LUCKY_FULL_WIDTH = 3861;
 const IMG_LUCKY_FULL_HEIGHT = 190;
+const IMG_PARTICLES_FULL_HEIGHT = 150;
+const IMG_PARTICLES_FULL_WIDTH = 150;
+
+const PARTICLE_WIDTH = 50;
+const PARTICLE_HEIGHT = 50;
+const PARTICLE_GRAVITY = 0.5;
+const PARTICLE_MIN_BOUNCE_BOUNDARY = 40;
+const PARTICLE_MAX_BOUNCE_BOUNDARY = 110;
+const PARTICLE_BOUNCE_MAX_AMOUNT = 3;
 
 const AMMO_INCREASE_INTERVAL_MS = 1500;
 const AMMO_MAX_AMOUNT = 15;
@@ -113,7 +125,7 @@ window.addEventListener("load", () => {
 			this.y = y + PROJECTILE_TOP_OFFSET_Y;
 			this.width = PROJECTILE_WIDTH;
 			this.height = PROJECTILE_HEIGHT;
-			this.speedX = 1;
+			this.speedX = PROJECTILE_SPEED;
 			this.markedForDeletion = false;
 			this.image = document.getElementById("imgProjectile");
 		}
@@ -127,6 +139,77 @@ window.addEventListener("load", () => {
 		draw(context) {
 			context.fillStyle = "yellow";
 			context.drawImage(this.image, this.x, this.y);
+		}
+	}
+
+	class Particle {
+		constructor(game, x, y) {
+			this.game = game;
+			this.x = x;
+			this.y = y;
+			this.size = Math.floor(
+				(Math.random() * PARTICLE_WIDTH) / 2 + PARTICLE_WIDTH / 2
+			);
+			this.speedX = Math.random() * 6 - 3; // speed = -3 to 3
+			this.speedY = Math.random() * -15; // speed = -15 to 0;
+			this.gravity = PARTICLE_GRAVITY;
+			this.angle = 0;
+			this.angularVelocity = Math.random() * 0.3 - 0.1; // rate at which the angle changes per animation frame. angularVelocity = -0.1 to 0.2
+
+			this.totalFramesX = IMG_PARTICLES_FULL_WIDTH / PARTICLE_WIDTH;
+			this.totalFramesY = IMG_PARTICLES_FULL_HEIGHT / PARTICLE_HEIGHT;
+			this.currentFrameX = Math.floor(Math.random() * this.totalFramesX);
+			this.currentFrameY = Math.floor(Math.random() * this.totalFramesY);
+
+			this.image = document.getElementById("imgGears");
+			this.markedForDeletion = false;
+
+			this.bounced = 0;
+			this.bounceBoundary =
+				Math.random() *
+					(PARTICLE_MAX_BOUNCE_BOUNDARY - PARTICLE_MIN_BOUNCE_BOUNDARY) +
+				PARTICLE_MIN_BOUNCE_BOUNDARY;
+		}
+		update() {
+			this.speedY += this.gravity;
+			this.x += this.speedX - this.game.speed;
+			this.y += this.speedY;
+			this.angle += this.angularVelocity;
+
+			if (
+				this.bounced < PARTICLE_BOUNCE_MAX_AMOUNT &&
+				this.y + this.size > this.game.height - this.bounceBoundary
+			) {
+				this.bounced++;
+				this.speedY *= -0.9;
+			}
+
+			if (
+				this.x < 0 - this.size ||
+				this.x > this.game.width + this.size ||
+				this.y < 0 - this.size ||
+				this.y > this.game.height + this.size - this.dropHeight
+			) {
+				this.markedForDeletion = true;
+			}
+		}
+		draw(context) {
+			context.save();
+			context.translate(this.x, this.y);
+			context.rotate(this.angle);
+
+			context.drawImage(
+				this.image,
+				this.currentFrameX * PARTICLE_WIDTH,
+				this.currentFrameY * PARTICLE_HEIGHT,
+				PARTICLE_WIDTH,
+				PARTICLE_HEIGHT,
+				-this.size / 2,
+				-this.size / 2,
+				this.size,
+				this.size
+			);
+			context.restore();
 		}
 	}
 
@@ -359,7 +442,7 @@ window.addEventListener("load", () => {
 		constructor(game, image, speedX) {
 			this.game = game;
 			this.image = image;
-			this.speedX = -speedX;
+			this.speedX = -speedX * this.game.speed;
 			this.width = IMG_LAYER_FULL_WIDTH;
 			this.height = IMG_LAYER_FULL_HEIGHT;
 			this.x = 0;
@@ -527,6 +610,7 @@ window.addEventListener("load", () => {
 			this.height = height;
 			this.gameOver = false;
 			this.debugMode = false;
+			this.speed = 1;
 
 			this.player = new Player(this);
 			this.inputHandler = new InputHandler(this);
@@ -535,6 +619,7 @@ window.addEventListener("load", () => {
 
 			this.keys = [];
 			this.enemies = [];
+			this.particles = [];
 
 			this.score = 0;
 			this.ammo = 10;
@@ -557,6 +642,7 @@ window.addEventListener("load", () => {
 				this.player.update(deltaTime);
 				this.#updateAmmo(deltaTime);
 				this.#updateEnemies(deltaTime);
+				this.#updateParticles();
 				this.background.layer4.update();
 			}
 		}
@@ -565,6 +651,7 @@ window.addEventListener("load", () => {
 			this.background.draw(context);
 			this.player.draw(context);
 			this.#drawEnemies(context);
+			this.#drawParticles(context);
 			this.ui.draw(context);
 			this.background.layer4.draw(context);
 		}
@@ -628,6 +715,7 @@ window.addEventListener("load", () => {
 				} else if (this.score > 0) {
 					this.score--;
 				}
+				this.#addParticles(enemy, ENEMY_DESTROYED_PARTICLES_AMOUNT);
 			}
 		}
 
@@ -638,10 +726,40 @@ window.addEventListener("load", () => {
 
 					enemy.lives--;
 					if (enemy.lives === 0) {
+						this.#addParticles(enemy, ENEMY_DESTROYED_PARTICLES_AMOUNT);
 						enemy.markedForDeletion = true;
 						this.score += enemy.points;
+					} else {
+						this.#addParticles(enemy, ENEMY_HIT_PARTICLES_AMOUNT);
 					}
 				}
+			});
+		}
+
+		#addParticles(enemy, numberOfParticles) {
+			for (let i = 0; i < numberOfParticles; i++) {
+				this.particles.push(
+					new Particle(
+						this,
+						enemy.x + enemy.width / 2,
+						enemy.y + enemy.height / 2
+					)
+				);
+			}
+		}
+
+		#updateParticles() {
+			this.particles.forEach((particle) => {
+				particle.update();
+			});
+			this.particles = this.particles.filter(
+				(particle) => !particle.markedForDeletion
+			);
+		}
+
+		#drawParticles(context) {
+			this.particles.forEach((particle) => {
+				particle.draw(context);
 			});
 		}
 	}
