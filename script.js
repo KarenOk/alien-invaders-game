@@ -45,6 +45,8 @@ const ENEMY_TYPE_LUCKY = "lucky";
 const ENEMY_TYPE_HIVEWHALE = "hivewhale";
 const ENEMY_DESTROYED_PARTICLES_AMOUNT = 3;
 const ENEMY_HIT_PARTICLES_AMOUNT = 1;
+const ENEMY_EXPLOSION_WIDTH = 200;
+const ENEMY_EXPLOSION_HEIGHT = 200;
 
 /* Projectile */
 
@@ -75,8 +77,10 @@ const IMG_DRONE_FULL_WIDTH = 4485;
 const IMG_DRONE_FULL_HEIGHT = 190;
 const IMG_PARTICLES_FULL_HEIGHT = 150;
 const IMG_PARTICLES_FULL_WIDTH = 150;
-const IMG_FIREBALL_FULL_HEIGHT = 145;
-const IMG_FIREBALL_FULL_WIDTH = 20;
+const IMG_FIREBALL_FULL_HEIGHT = 20;
+const IMG_FIREBALL_FULL_WIDTH = 145;
+const IMG_EXPLOSION_FULL_HEIGHT = 200;
+const IMG_EXPLOSION_FULL_WIDTH = 1600;
 
 /* Particles */
 
@@ -557,6 +561,63 @@ window.addEventListener("load", () => {
 		}
 	}
 
+	class Explosion {
+		constructor(game, x, y, size) {
+			this.game = game;
+			this.x = x;
+			this.y = y;
+			this.size = size;
+
+			this.currentFrameX = 0;
+			this.currentFrameY = 0;
+			this.totalFramesX = IMG_EXPLOSION_FULL_WIDTH / this.size;
+
+			this.timer = 0;
+			this.fps = 15;
+			this.interval = 1000 / this.fps;
+
+			this.markedForDeletion = false;
+		}
+
+		update(deltaTime) {
+			if (this.timer > this.interval) {
+				this.timer = 0;
+				if (this.currentFrameX < this.totalFramesX) this.currentFrameX++;
+				else this.markedForDeletion = true;
+			} else {
+				this.timer += deltaTime;
+			}
+		}
+
+		draw(context) {
+			context.drawImage(
+				this.image,
+				this.currentFrameX * ENEMY_EXPLOSION_WIDTH,
+				this.currentFrameY,
+				ENEMY_EXPLOSION_WIDTH,
+				ENEMY_EXPLOSION_HEIGHT,
+				this.x,
+				this.y,
+				this.size,
+				this.size
+			);
+		}
+	}
+
+	class SmokeExplosion extends Explosion {
+		constructor(game, x, y, size) {
+			super(game, x, y, size);
+			this.image = document.getElementById("imgSmokeExplosion");
+		}
+	}
+
+	class FireExplosion extends Explosion {
+		constructor(game, x, y, size) {
+			super(game, x, y, size);
+			this.image = document.getElementById("imgFireExplosion");
+		}
+	}
+
 	class Layer {
 		constructor(game, image, speedX) {
 			this.game = game;
@@ -739,6 +800,7 @@ window.addEventListener("load", () => {
 			this.keys = [];
 			this.enemies = [];
 			this.particles = [];
+			this.explosions = [];
 
 			this.score = 0;
 			this.maxAmmo = AMMO_MAX_AMOUNT;
@@ -760,6 +822,7 @@ window.addEventListener("load", () => {
 				this.background.update();
 				this.player.update(deltaTime);
 				this.#updateAmmo(deltaTime);
+				this.#updateExplosions(deltaTime);
 				this.#updateEnemies(deltaTime);
 				this.#updateParticles();
 				this.background.layer4.update();
@@ -769,8 +832,9 @@ window.addEventListener("load", () => {
 		draw() {
 			this.background.draw(context);
 			this.player.draw(context);
-			this.#drawEnemies(context);
 			this.#drawParticles(context);
+			this.#drawEnemies(context);
+			this.#drawExplosions(context);
 			this.ui.draw(context);
 			this.background.layer4.draw(context);
 		}
@@ -844,6 +908,9 @@ window.addEventListener("load", () => {
 					this.score--;
 				}
 				this.#addParticles(enemy, ENEMY_DESTROYED_PARTICLES_AMOUNT);
+				this.explosions.push(
+					new SmokeExplosion(this, enemy.x, enemy.y, enemy.height, enemy.height)
+				);
 			}
 		}
 
@@ -857,6 +924,15 @@ window.addEventListener("load", () => {
 						this.#addParticles(enemy, ENEMY_DESTROYED_PARTICLES_AMOUNT);
 						enemy.markedForDeletion = true;
 						this.score += enemy.points;
+						this.explosions.push(
+							new FireExplosion(
+								this,
+								enemy.x,
+								enemy.y,
+								enemy.height,
+								enemy.height
+							)
+						);
 						if (enemy.type === ENEMY_TYPE_HIVEWHALE) {
 							this.#addDrones(enemy);
 						}
@@ -891,6 +967,21 @@ window.addEventListener("load", () => {
 		#drawParticles(context) {
 			this.particles.forEach((particle) => {
 				particle.draw(context);
+			});
+		}
+
+		#updateExplosions(deltaTime) {
+			this.explosions.forEach((explosion) => {
+				explosion.update(deltaTime);
+			});
+			this.explosions = this.explosions.filter(
+				(explosion) => !explosion.markedForDeletion
+			);
+		}
+
+		#drawExplosions(context) {
+			this.explosions.forEach((explosion) => {
+				explosion.draw(context);
 			});
 		}
 	}
