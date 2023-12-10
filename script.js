@@ -198,6 +198,44 @@ window.addEventListener("load", () => {
 		}
 	}
 
+	class SoundController {
+		constructor(game) {
+			this.game = game;
+
+			this.powerUp = document.getElementById("audioPowerUp");
+			this.powerDown = document.getElementById("audioPowerDown");
+			this.shot = document.getElementById("audioShot");
+			this.explosion = document.getElementById("audioExplosion");
+			this.poof = document.getElementById("audioPoof");
+			this.shield = document.getElementById("audioShield");
+		}
+
+		playPowerUp() {
+			this.powerUp.currentTime = 0;
+			this.powerUp.play();
+		}
+
+		playPowerDown() {
+			this.powerDown.currentTime = 0;
+			this.powerDown.play();
+		}
+
+		playShot() {
+			this.shot.currentTime = 0;
+			this.shot.play();
+		}
+
+		playExplosion() {
+			this.explosion.currentTime = 0;
+			this.explosion.play();
+		}
+
+		playPoof() {
+			this.poof.currentTime = 0;
+			this.poof.play();
+		}
+	}
+
 	class Projectile {
 		constructor(game, x, y) {
 			this.game = game;
@@ -356,6 +394,7 @@ window.addEventListener("load", () => {
 
 		shoot() {
 			if (this.game.ammo > 0) {
+				this.game.sound.playShot();
 				this.projectiles.push(new Projectile(this.game, this.x, this.y));
 				if (this.poweredUp) {
 					this.projectiles.push(
@@ -371,10 +410,16 @@ window.addEventListener("load", () => {
 		}
 
 		powerUp() {
+			this.game.sound.playPowerUp();
 			this.poweredUp = true;
 			this.poweredUpTimer = 0;
 			if (this.game.ammo < this.game.maxAmmo)
 				this.game.ammo = this.game.maxAmmo;
+		}
+
+		#powerDown() {
+			this.game.sound.playPowerDown();
+			this.poweredUp = false;
 		}
 
 		#handleKeyPress() {
@@ -435,7 +480,7 @@ window.addEventListener("load", () => {
 				this.currentFrameY = 1;
 				this.game.ammo += POWERUP_AMMO_INCREMENT;
 				if (this.poweredUpTimer > POWERUP_DURATION_MS) {
-					this.poweredUp = false;
+					this.#powerDown();
 				}
 			}
 
@@ -895,6 +940,7 @@ window.addEventListener("load", () => {
 			this.debugMode = false;
 			this.speed = 1;
 
+			this.sound = new SoundController(this);
 			this.player = new Player(this);
 			this.inputHandler = new InputHandler(this);
 			this.ui = new UI(this);
@@ -1014,6 +1060,7 @@ window.addEventListener("load", () => {
 				} else if (this.score > 0) {
 					this.score--;
 				}
+				this.sound.playPoof();
 				this.#addParticles(enemy, ENEMY_DESTROYED_PARTICLES_AMOUNT);
 				this.explosions.push(
 					new SmokeExplosion(this, enemy.x, enemy.y, enemy.height, enemy.height)
@@ -1025,8 +1072,9 @@ window.addEventListener("load", () => {
 			this.player.projectiles.forEach((projectile) => {
 				if (this.checkCollision(projectile, enemy)) {
 					projectile.markedForDeletion = true;
-
 					enemy.lives--;
+
+					this.sound.playExplosion();
 					if (enemy.lives === 0) {
 						this.#addParticles(enemy, ENEMY_DESTROYED_PARTICLES_AMOUNT);
 						enemy.markedForDeletion = true;
