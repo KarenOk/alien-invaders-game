@@ -50,6 +50,8 @@ const ENEMY_HIT_PARTICLES_AMOUNT = 1;
 
 const PROJECTILE_WIDTH = 28;
 const PROJECTILE_HEIGHT = 10;
+const PROJECTILE_FIREBALL_WIDTH = 37;
+const PROJECTILE_FIREBALL_HEIGHT = 20;
 const PROJECTILE_OFFSET_X = 98;
 const PROJECTILE_TOP_OFFSET_Y = 28;
 const PROJECTILE_BOTTOM_OFFSET_Y = 45;
@@ -73,6 +75,8 @@ const IMG_DRONE_FULL_WIDTH = 4485;
 const IMG_DRONE_FULL_HEIGHT = 190;
 const IMG_PARTICLES_FULL_HEIGHT = 150;
 const IMG_PARTICLES_FULL_WIDTH = 150;
+const IMG_FIREBALL_FULL_HEIGHT = 145;
+const IMG_FIREBALL_FULL_WIDTH = 20;
 
 /* Particles */
 
@@ -169,22 +173,48 @@ window.addEventListener("load", () => {
 			this.game = game;
 			this.x = x + PROJECTILE_OFFSET_X;
 			this.y = y + PROJECTILE_TOP_OFFSET_Y;
-			this.width = PROJECTILE_WIDTH;
-			this.height = PROJECTILE_HEIGHT;
+			this.width = PROJECTILE_FIREBALL_WIDTH;
+			this.height = PROJECTILE_FIREBALL_HEIGHT;
 			this.speedX = PROJECTILE_SPEED;
 			this.markedForDeletion = false;
-			this.image = document.getElementById("imgProjectile");
+			this.image = document.getElementById("imgFireball");
+
+			this.currentFrameX = 0;
+			this.currentFrameY = 0;
+			this.totalFramesX = IMG_FIREBALL_FULL_WIDTH / PROJECTILE_WIDTH;
+
+			this.fps = 20;
+			this.timer = 0;
+			this.interval = 1000 / this.fps;
 		}
-		update() {
+		update(deltaTime) {
 			this.x += this.speedX;
 			if (this.x > this.game.width * 0.9) {
 				// don't delete enemies just at the right edge of canvas
 				this.markedForDeletion = true;
 			}
+
+			if (this.timer >= this.interval) {
+				this.timer = 0;
+				if (this.currentFrameX < this.totalFramesX) this.currentFrameX++;
+				else this.currentFrameX = 0;
+			} else {
+				this.timer += deltaTime;
+			}
 		}
 		draw(context) {
 			context.fillStyle = "yellow";
-			context.drawImage(this.image, this.x, this.y);
+			context.drawImage(
+				this.image,
+				this.currentFrameX * this.width,
+				this.currentFrameY,
+				this.width,
+				this.height,
+				this.x,
+				this.y,
+				this.width,
+				this.height
+			);
 		}
 	}
 
@@ -711,7 +741,8 @@ window.addEventListener("load", () => {
 			this.particles = [];
 
 			this.score = 0;
-			this.ammo = 10;
+			this.maxAmmo = AMMO_MAX_AMOUNT;
+			this.ammo = this.maxAmmo;
 
 			this.gameTimer = 0;
 			this.ammoTimer = 0;
@@ -719,7 +750,6 @@ window.addEventListener("load", () => {
 
 			this.winningScore = WINNING_SCORE;
 			this.maxGameTime = GAME_TIME_MAX_MS;
-			this.maxAmmo = AMMO_MAX_AMOUNT;
 		}
 
 		update(deltaTime) {
