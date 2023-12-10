@@ -1,11 +1,22 @@
-// constants
+/*
+ *
+ * CONSTANTS
+ *
+ */
+
+/* Canvas */
+
 const CANVAS_WIDTH = 500;
 const CANVAS_HEIGHT = 500;
+
+/* Player */
 
 const PLAYER_WIDTH = 120;
 const PLAYER_HEIGHT = 190;
 const PLAYER_OFFSET_X = 20;
 const PLAYER_SPEED = 3;
+
+/* Enemies */
 
 const ENEMY_ANGLER1_WIDTH = 228;
 const ENEMY_ANGLER1_HEIGHT = 169;
@@ -19,12 +30,23 @@ const ENEMY_LUCKY_WIDTH = 99;
 const ENEMY_LUCKY_HEIGHT = 95;
 const ENEMY_LUCKY_LIVES = 3;
 const ENEMY_LUCKY_POINTS = 15;
+const ENEMY_HIVEWHALE_WIDTH = 400;
+const ENEMY_HIVEWHALE_HEIGHT = 227;
+const ENEMY_HIVEWHALE_LIVES = 10;
+const ENEMY_HIVEWHALE_POINTS = ENEMY_HIVEWHALE_LIVES;
+const ENEMY_HIVEWHALE_DESTROYED_DRONES_AMOUNT = 3;
+const ENEMY_DRONE_WIDTH = 115;
+const ENEMY_DRONE_HEIGHT = 95;
+const ENEMY_DRONE_LIVES = 1;
+const ENEMY_DRONE_POINTS = ENEMY_DRONE_LIVES;
 const ENEMY_SPAWN_INTERVAL_MS = 3000;
-const ENEMY_MAX_SPEED = 2;
 const ENEMY_TYPE_ANGLER = "angler";
 const ENEMY_TYPE_LUCKY = "lucky";
+const ENEMY_TYPE_HIVEWHALE = "hivewhale";
 const ENEMY_DESTROYED_PARTICLES_AMOUNT = 3;
 const ENEMY_HIT_PARTICLES_AMOUNT = 1;
+
+/* Projectile */
 
 const PROJECTILE_WIDTH = 28;
 const PROJECTILE_HEIGHT = 10;
@@ -32,6 +54,8 @@ const PROJECTILE_OFFSET_X = 98;
 const PROJECTILE_TOP_OFFSET_Y = 28;
 const PROJECTILE_BOTTOM_OFFSET_Y = 45;
 const PROJECTILE_SPEED = 6;
+
+/* Images */
 
 const IMG_LAYER_FULL_WIDTH = 1768;
 const IMG_LAYER_FULL_HEIGHT = 500;
@@ -43,8 +67,14 @@ const IMG_ANGLER2_FULL_WIDTH = 8307;
 const IMG_ANGLER2_FULL_HEIGHT = 337;
 const IMG_LUCKY_FULL_WIDTH = 3861;
 const IMG_LUCKY_FULL_HEIGHT = 190;
+const IMG_HIVEWHALE_FULL_WIDTH = 15600;
+const IMG_HIVEWHALE_FULL_HEIGHT = 227;
+const IMG_DRONE_FULL_WIDTH = 4485;
+const IMG_DRONE_FULL_HEIGHT = 190;
 const IMG_PARTICLES_FULL_HEIGHT = 150;
 const IMG_PARTICLES_FULL_WIDTH = 150;
+
+/* Particles */
 
 const PARTICLE_WIDTH = 50;
 const PARTICLE_HEIGHT = 50;
@@ -53,11 +83,17 @@ const PARTICLE_MIN_BOUNCE_BOUNDARY = 40;
 const PARTICLE_MAX_BOUNCE_BOUNDARY = 110;
 const PARTICLE_BOUNCE_MAX_AMOUNT = 3;
 
-const AMMO_INCREASE_INTERVAL_MS = 1500;
+/* Ammo */
+
+const AMMO_INCREASE_INTERVAL_MS = 1000;
 const AMMO_MAX_AMOUNT = 15;
+
+/* Powerup */
 
 const POWERUP_DURATION_MS = 5000;
 const POWERUP_AMMO_INCREMENT = 0.1;
+
+/* Top left Display */
 
 const DISPLAY_FONT_FAMILY = "Special Elite";
 const DISPLAY_FONT_SIZE = 16;
@@ -75,6 +111,8 @@ const DISPLAY_AMMO_SPACING = 5;
 const DISPLAY_AMMO_POWERUP_COLOR = "#ffffbd";
 const DISPLAY_GAMEOVER_TEXT_OFFSET_Y = 20;
 
+/* Game over */
+
 const GAMEOVER_MSG_WIN_MAIN_TEXT = "You Rock!";
 const GAMEOVER_MSG_WIN_SEC_TEXT = "You won the game!";
 const GAMEOVER_MSG_LOSS_MAIN_TEXT = "Bummer!";
@@ -83,10 +121,18 @@ const GAMEOVER_MSG_LOSS_SEC_TEXT = "Better luck next time!";
 const WINNING_SCORE = 30;
 const GAME_TIME_MAX_MS = 30000;
 
+/* Keys */
+
 const KEY_ARROW_DOWN = "ArrowDown";
 const KEY_ARROW_UP = "ArrowUp";
 const KEY_SPACEBAR = " ";
 const KEY_DEBUG = "d";
+
+/*
+ *
+ * GAME LOGIC
+ *
+ */
 
 window.addEventListener("load", () => {
 	const canvas = document.getElementById("canvas");
@@ -267,7 +313,8 @@ window.addEventListener("load", () => {
 		powerUp() {
 			this.poweredUp = true;
 			this.poweredUpTimer = 0;
-			this.game.ammo = this.game.maxAmmo;
+			if (this.game.ammo < this.game.maxAmmo)
+				this.game.ammo = this.game.maxAmmo;
 		}
 
 		#handleKeyPress() {
@@ -357,7 +404,8 @@ window.addEventListener("load", () => {
 
 		draw(context) {
 			if (this.game.debugMode) {
-				context.fillStyle = "red";
+				context.save();
+				context.fillStyle = context.strokeStyle = "red";
 				context.fillText(
 					this.lives,
 					this.x,
@@ -365,7 +413,8 @@ window.addEventListener("load", () => {
 					this.width,
 					this.height
 				);
-				context.fillRect(this.x, this.y, this.width, this.height);
+				context.strokeRect(this.x, this.y, this.width, this.height);
+				context.restore();
 			}
 			context.drawImage(
 				this.image,
@@ -435,6 +484,46 @@ window.addEventListener("load", () => {
 			this.totalFramesY = IMG_LUCKY_FULL_HEIGHT / this.height;
 			this.currentFrameX = 0;
 			this.currentFrameY = Math.floor(Math.random()) * 2;
+		}
+	}
+
+	class HiveWhale extends Enemy {
+		constructor(game) {
+			super(game);
+			this.type = ENEMY_TYPE_HIVEWHALE;
+			this.width = ENEMY_HIVEWHALE_WIDTH;
+			this.height = ENEMY_HIVEWHALE_HEIGHT;
+			this.y = Math.random() * (this.game.height - this.height);
+			this.speedX = Math.random() * -1.2 - 0.2; // speed: -0.2 -> -1.2
+
+			this.lives = ENEMY_HIVEWHALE_LIVES;
+			this.points = ENEMY_HIVEWHALE_POINTS;
+
+			this.image = document.getElementById("imgHiveWhale");
+			this.totalFramesX = IMG_HIVEWHALE_FULL_WIDTH / this.width;
+			this.totalFramesY = IMG_HIVEWHALE_FULL_HEIGHT / this.height;
+			this.currentFrameX = 0;
+			this.currentFrameY = 0;
+		}
+	}
+
+	class Drone extends Enemy {
+		constructor(game, x, y) {
+			super(game);
+			this.x = x;
+			this.y = y;
+			this.width = ENEMY_DRONE_WIDTH;
+			this.height = ENEMY_DRONE_HEIGHT;
+			this.speedX = Math.random() * -5 - 1; // speed: -1 -> -5
+
+			this.lives = ENEMY_DRONE_LIVES;
+			this.points = ENEMY_DRONE_POINTS;
+
+			this.image = document.getElementById("imgDrone");
+			this.totalFramesX = IMG_DRONE_FULL_WIDTH / this.width;
+			this.totalFramesY = IMG_DRONE_FULL_HEIGHT / this.height;
+			this.currentFrameX = 0;
+			this.currentFrameY = Math.floor(Math.random() * this.totalFramesY);
 		}
 	}
 
@@ -702,9 +791,18 @@ window.addEventListener("load", () => {
 
 			if (seed < 0.3) EnemyClass = Lucky;
 			else if (seed < 0.6) EnemyClass = Angler2;
+			else if (seed < 0.8) EnemyClass = HiveWhale;
 			else EnemyClass = Angler1;
 
 			this.enemies.push(new EnemyClass(this));
+		}
+
+		#addDrones(enemy) {
+			for (let i = 0; i < ENEMY_HIVEWHALE_DESTROYED_DRONES_AMOUNT; i++) {
+				const droneX = enemy.x + (Math.random() * enemy.width) / 3;
+				const droneY = enemy.y + (Math.random() * enemy.height) / 3;
+				this.enemies.push(new Drone(this, droneX, droneY));
+			}
 		}
 
 		#handleEnemyPlayerCollision(enemy) {
@@ -729,6 +827,9 @@ window.addEventListener("load", () => {
 						this.#addParticles(enemy, ENEMY_DESTROYED_PARTICLES_AMOUNT);
 						enemy.markedForDeletion = true;
 						this.score += enemy.points;
+						if (enemy.type === ENEMY_TYPE_HIVEWHALE) {
+							this.#addDrones(enemy);
+						}
 					} else {
 						this.#addParticles(enemy, ENEMY_HIT_PARTICLES_AMOUNT);
 					}
