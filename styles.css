@@ -11,6 +11,7 @@ body {
     height: 100vh;
     background: url(./assets/images/background.png) #193F6E no-repeat;
     background-size: cover;
+    overflow: hidden;
 
 }
 
@@ -24,4 +25,25 @@ body {
 
 img {
     display: none;
+}
+
+
+.github-banner img {
+    display: block;
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    z-index: 1000;
+    width: 40px;
+}
+
+.github-banner::after {
+    content: "";
+    width: 200px;
+    height: 200px;
+    position: fixed;
+    background-color: #b2a02a;
+    top: -100px;
+    right: -100px;
+    transform: rotate(45deg);
 }
