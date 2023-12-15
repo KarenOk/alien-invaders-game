@@ -166,6 +166,8 @@ const KEY_ARROW_LEFT = "ArrowLeft";
 const KEY_ARROW_RIGHT = "ArrowRight";
 const KEY_SPACEBAR = " ";
 const KEY_DEBUG = "d";
+const KEY_PAUSE = "p";
+const KEY_MUTE = "m";
 
 /*
  *
@@ -192,9 +194,15 @@ window.addEventListener("load", () => {
 				) {
 					this.game.keys.push(e.key);
 				} else if (e.key === KEY_SPACEBAR) {
-					this.game.player.shoot();
-				} else if (e.key === KEY_DEBUG) {
+					if (!this.game.paused) this.game.player.shoot();
+				} else if (e.key.toLowerCase() === KEY_DEBUG) {
 					this.game.debugMode = !this.game.debugMode;
+				} else if (e.key.toLowerCase() === KEY_PAUSE) {
+					this.game.paused = !this.game.paused;
+					togglePausePlayBtns(this.game.paused);
+				} else if (e.key.toLowerCase() === KEY_MUTE) {
+					this.game.muted = !this.game.muted;
+					toggleMuteUnmuteBtns(this.game.muted);
 				}
 			});
 
@@ -219,28 +227,38 @@ window.addEventListener("load", () => {
 		}
 
 		playPowerUp() {
-			this.powerUp.currentTime = 0;
-			this.powerUp.play();
+			if (!this.game.muted) {
+				this.powerUp.currentTime = 0;
+				this.powerUp.play();
+			}
 		}
 
 		playPowerDown() {
-			this.powerDown.currentTime = 0;
-			this.powerDown.play();
+			if (!this.game.muted) {
+				this.powerDown.currentTime = 0;
+				this.powerDown.play();
+			}
 		}
 
 		playShot() {
-			this.shot.currentTime = 0;
-			this.shot.play();
+			if (!this.game.muted) {
+				this.shot.currentTime = 0;
+				this.shot.play();
+			}
 		}
 
 		playExplosion() {
-			this.explosion.currentTime = 0;
-			this.explosion.play();
+			if (!this.game.muted) {
+				this.explosion.currentTime = 0;
+				this.explosion.play();
+			}
 		}
 
 		playPoof() {
-			this.poof.currentTime = 0;
-			this.poof.play();
+			if (!this.game.muted) {
+				this.poof.currentTime = 0;
+				this.poof.play();
+			}
 		}
 	}
 
@@ -910,8 +928,11 @@ window.addEventListener("load", () => {
 			this.#drawScore(context);
 			this.#drawTimer(context);
 			this.#drawAmmo(context);
-			this.#drawGameOver(context);
-
+			if (this.game.paused) {
+				this.#drawPaused(context);
+			} else {
+				this.#drawGameOver(context);
+			}
 			context.restore();
 		}
 
@@ -961,6 +982,20 @@ window.addEventListener("load", () => {
 			);
 		}
 
+		#drawPaused(context) {
+			context.textAlign = "center";
+			context.fillColor = this.color;
+			context.font = `60px ${this.fontFamily}`;
+
+			context.fillText(
+				"Paused...",
+				this.game.width / 2,
+				this.game.height / 2,
+				this.game.width,
+				this.game.height
+			);
+		}
+
 		#drawTimer(context) {
 			let timeLeftMs = this.game.maxGameTime - this.game.gameTimer;
 			if (timeLeftMs < 0) timeLeftMs = 0;
@@ -1002,6 +1037,8 @@ window.addEventListener("load", () => {
 			this.gameOver = false;
 			this.debugMode = false;
 			this.speed = 1;
+			this.paused = false;
+			this.muted = false;
 
 			this.sound = new SoundController(this);
 			this.player = new Player(this);
@@ -1030,7 +1067,7 @@ window.addEventListener("load", () => {
 		update(deltaTime) {
 			if (this.gameTimer > this.maxGameTime) this.gameOver = true;
 
-			if (!this.gameOver) {
+			if (!this.paused && !this.gameOver) {
 				this.gameTimer += deltaTime;
 				this.background.update();
 				this.player.update(deltaTime);
@@ -1054,7 +1091,23 @@ window.addEventListener("load", () => {
 			this.background.layer4.draw(context);
 		}
 
-		checkCollision(rect1, rect2) {
+		play() {
+			this.paused = false;
+		}
+
+		pause() {
+			this.paused = true;
+		}
+
+		mute() {
+			this.muted = true;
+		}
+
+		unmute() {
+			this.muted = false;
+		}
+
+		#checkCollision(rect1, rect2) {
 			return (
 				rect1.x < rect2.x + rect2.width &&
 				rect2.x < rect1.x + rect1.width &&
@@ -1119,7 +1172,7 @@ window.addEventListener("load", () => {
 		}
 
 		#handleEnemyPlayerCollision(enemy) {
-			if (this.checkCollision(this.player, enemy)) {
+			if (this.#checkCollision(this.player, enemy)) {
 				enemy.markedForDeletion = true;
 				if (enemy.type === ENEMY_TYPE_LUCKY) {
 					this.player.powerUp();
@@ -1137,7 +1190,7 @@ window.addEventListener("load", () => {
 
 		#handleEnemyProjectilesCollision(enemy) {
 			this.player.projectiles.forEach((projectile) => {
-				if (this.checkCollision(projectile, enemy)) {
+				if (this.#checkCollision(projectile, enemy)) {
 					projectile.markedForDeletion = true;
 					enemy.lives--;
 
@@ -1210,21 +1263,133 @@ window.addEventListener("load", () => {
 		}
 	}
 
+	let animationFrameRequestId = null;
+	let currentGame = null;
+
 	function startGame() {
-		const game = new Game(CANVAS_WIDTH, CANVAS_HEIGHT);
-		let lastTime = 0;
+		if (animationFrameRequestId) {
+			cancelAnimationFrame(animationFrameRequestId);
+			animationFrameRequestId = null;
+		}
+
+		currentGame = new Game(CANVAS_WIDTH, CANVAS_HEIGHT);
+		let lastTime;
 
 		function animate(currentTime) {
+			if (!lastTime) lastTime = currentTime;
 			const deltaTime = currentTime - lastTime;
 			lastTime = currentTime;
 
 			context.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-			game.update(deltaTime);
-			game.draw();
-			requestAnimationFrame(animate);
+			currentGame.update(deltaTime);
+			currentGame.draw();
+			animationFrameRequestId = requestAnimationFrame(animate);
 		}
 		animate(0);
 	}
 
-	startGame();
+	const splashScreen = document.getElementById("splashscreen");
+	const gameScreen = document.getElementById("game");
+	const startBtn = document.querySelector(".startBtn");
+	const restartBtn = document.querySelector(".restartBtn");
+	const playButton = document.querySelector(".playBtn");
+	const pauseButton = document.querySelector(".pauseBtn");
+	const muteButton = document.querySelector(".muteBtn");
+	const unmuteButton = document.querySelector(".unmuteBtn");
+	const username = document.querySelector(".username");
+	const changeUsernameBtn = username.querySelector(".changeUsernameBtn");
+	const saveUsernameBtn = username.querySelector(".saveUsernameBtn");
+	const usernameValue = username.querySelector(".username__value");
+	const usernameEntry = username.querySelector(".username__entry");
+	const usernameDisplay = username.querySelector(".username__display");
+	const usernameForm = username.querySelector(".username__form");
+
+	function getRandomId() {
+		const uint32 = window.crypto.getRandomValues(new Uint32Array(1))[0];
+		return uint32.toString(16);
+	}
+
+	function initLocalStorage() {
+		if (!localStorage.getItem("playerId")) {
+			const playerId = getRandomId();
+			localStorage.setItem("playerId", playerId);
+			localStorage.setItem("playerName", `Player${playerId}`);
+		}
+	}
+
+	const handleStartOrRestartClicked = (e) => {
+		e.currentTarget.blur();
+
+		splashScreen.classList.add("hidden");
+		gameScreen.classList.remove("hidden");
+		startGame();
+	};
+
+	const handlePlayOrPauseClicked = (e) => {
+		e.currentTarget.blur();
+
+		if (!currentGame) return;
+		if (currentGame.paused) currentGame.play();
+		else currentGame.pause();
+
+		togglePausePlayBtns(currentGame.paused);
+	};
+
+	function togglePausePlayBtns(paused) {
+		if (paused) {
+			pauseButton.classList.add("hidden");
+			playButton.classList.remove("hidden");
+		} else {
+			playButton.classList.add("hidden");
+			pauseButton.classList.remove("hidden");
+		}
+	}
+
+	const handleMuteOrUnmuteClicked = (e) => {
+		e.currentTarget.blur();
+
+		if (!currentGame) return;
+		if (currentGame.muted) currentGame.unmute();
+		else currentGame.mute();
+
+		toggleMuteUnmuteBtns(currentGame.muted);
+	};
+
+	function toggleMuteUnmuteBtns(muted) {
+		if (muted) {
+			muteButton.classList.add("hidden");
+			unmuteButton.classList.remove("hidden");
+		} else {
+			unmuteButton.classList.add("hidden");
+			muteButton.classList.remove("hidden");
+		}
+	}
+
+	function handleChangeUsernameBtnClicked() {
+		usernameForm.classList.remove("hidden");
+		usernameDisplay.classList.add("hidden");
+	}
+
+	function handleUsernameSubmitClicked(e) {
+		console.log("submitting");
+		e.preventDefault();
+		console.log("submited");
+		localStorage.setItem("playerName", usernameEntry.value);
+		usernameValue.innerText = usernameEntry.value;
+		usernameForm.classList.add("hidden");
+		usernameDisplay.classList.remove("hidden");
+	}
+
+	initLocalStorage();
+	usernameValue.innerText = localStorage.getItem("playerName");
+	usernameEntry.value = localStorage.getItem("playerName");
+
+	startBtn.addEventListener("click", handleStartOrRestartClicked);
+	restartBtn.addEventListener("click", handleStartOrRestartClicked);
+	playButton.addEventListener("click", handlePlayOrPauseClicked);
+	pauseButton.addEventListener("click", handlePlayOrPauseClicked);
+	unmuteButton.addEventListener("click", handleMuteOrUnmuteClicked);
+	muteButton.addEventListener("click", handleMuteOrUnmuteClicked);
+	changeUsernameBtn.addEventListener("click", handleChangeUsernameBtnClicked);
+	usernameForm.addEventListener("submit", handleUsernameSubmitClicked);
 });

@@ -1,3 +1,4 @@
+/* General Styles */
 * {
     margin: 0;
     padding: 0;
@@ -5,36 +6,49 @@
 }
 
 body {
+    font-family: Special Elite, sans-serif;
+}
+
+button {
+    border: none;
+    background-color: transparent;
+    color: white;
+    cursor: pointer;
+}
+
+
+.icon-button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.icon-button--circle {
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+.center {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    background: url(./assets/images/background.png) #193F6E no-repeat;
-    background-size: cover;
-    overflow: hidden;
-
 }
 
-#canvas {
-    border: 5px solid black;
-    background-color: #193F6E;
-    max-height: 100%;
-    max-width: 100%;
-    font-family: "Special Elite";
-}
-
-img {
-    display: none;
+.hidden {
+    display: none !important;
 }
 
 
-.github-banner img {
-    display: block;
+/* Github Banner */
+
+.github-banner i {
     position: fixed;
     top: 25px;
     right: 25px;
     z-index: 1000;
-    width: 40px;
+    font-size: 40px;
+    color: white;
 }
 
 .github-banner::after {
@@ -46,4 +60,88 @@ img {
     top: -100px;
     right: -100px;
     transform: rotate(45deg);
+}
+
+/* Section Styles */
+
+.gamescreen {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: url(./assets/images/background.png) #193F6E no-repeat;
+    background-size: cover;
+    overflow: hidden;
+
+}
+
+.game-canvas {
+    border: 5px solid black;
+    background-color: #193F6E;
+    max-height: 100%;
+    max-width: 100%;
+    font-family: "Special Elite";
+    margin-top: 20px;
+}
+
+.gamescreen img {
+    display: none;
+}
+
+.gamescreen button {
+    font-size: 1rem;
+    margin: 10px 10px;
+    width: 2em;
+    height: 2em;
+}
+
+
+.splashscreen {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background: url(./assets/images/background.png) #193F6E no-repeat;
+    background-size: cover;
+    overflow: hidden;
+    color: white;
+    text-align: center;
+}
+
+.splashscreen__title {
+    font-size: 5em;
+    color: #ffffbd;
+    margin-bottom: 20px;
+}
+
+.splashscreen__welcome {
+    margin-bottom: 30px;
+    font-size: 1.1em;
+    margin-bottom: 30px;
+
+}
+
+.splashscreen__actions button {
+    margin: 10px 20px;
+    font-size: 1.5em;
+    width: 2em;
+    height: 2em;
+}
+
+.username {
+    margin-left: 10px;
+}
+
+.username__content {
+    margin-top: 6px;
+}
+
+
+
+.username button {
+    margin-left: 5px;
+    font-size: 1em;
+
 }

@@ -2,61 +2,112 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Alien Invaders</title>
-    <link rel="shortcut icon" href="./assets/icons/favicon3.png" type="image/x-icon">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Alien Invaders</title>
+        <link rel="shortcut icon" href="./assets/icons/favicon3.png" type="image/x-icon">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="styles.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
 <body>
-    <!-- layers -->
-    <img id="imgLayer1" src="./assets/images/layer1.png" alt="">
-    <img id="imgLayer2" src="./assets/images/layer2.png" alt="">
-    <img id="imgLayer3" src="./assets/images/layer3.png" alt="">
-    <img id="imgLayer4" src="./assets/images/layer4.png" alt="">
+        <div class="github-banner">
+                <a href="https://github.com/KarenOk/alien-invaders-game" target="_blank" class="github-link">
+                        <i class="fa-brands fa-github" title="Fork me on Github"></i>
+                </a>
+        </div>
 
-    <!-- characters -->
-    <img id="imgPlayer" src="./assets/images/player.png" alt="">
-    <img id="imgAngler1" src="./assets/images/angler1.png" alt="">
-    <img id="imgAngler2" src="./assets/images/angler2.png" alt="">
-    <img id="imgLucky" src="./assets/images/lucky.png" alt="">
-    <img id="imgHiveWhale" src="./assets/images/hivewhale.png" alt="">
-    <img id="imgDrone" src="./assets/images/drone.png" alt="">
-    <img id="imgBulbWhale" src="./assets/images/bulbwhale.png" alt="">
-    <img id="imgMoonFish" src="./assets/images/moonfish.png" alt="">
-    <img id="imgStalker" src="./assets/images/stalker.png" alt="">
-    <img id="imgRazorFin" src="./assets/images/razorfin.png" alt="">
+        <section id="game" class="gamescreen hidden">
+                <div class="game-controls">
+                        <button class="playBtn icon-button icon-button--circle hidden"><i class="fa-solid fa-play"
+                                        title="Play Game"></i></button>
+                        <button class="pauseBtn icon-button icon-button--circle"><i class="fa-solid fa-pause"
+                                        title="Pause Game"></i></button>
+                        <button class="restartBtn icon-button icon-button--circle"><i class="fa-solid fa-rotate-right"
+                                        title="Restart Game"></i></button>
+                        <button class="muteBtn icon-button icon-button--circle"><i class="fa-solid fa-volume-xmark"
+                                        title="Mute Game"></i></button>
+                        <button class="unmuteBtn icon-button icon-button--circle hidden"><i
+                                        class="fa-solid fa-volume-high" title="Unmute Game"></i></button>
+                        <button class="icon-button icon-button--circle"><i class="fa-solid fa-question"
+                                        title="Game Help"></i></button>
+                        <button class="icon-button icon-button--circle"><i class="fa-solid fa-trophy"
+                                        title="Leaderboard"></i></button>
+                </div>
 
-    <!-- props -->
-    <img id="imgProjectile" src="./assets/images/projectile.png" alt="">
-    <img id="imgFireball" src="./assets/images/fireball.png" alt="">
-    <img id="imgGears" src="./assets/images/gears.png" alt="">
-    <img id="imgFireExplosion" src="./assets/images/fireExplosion.png" alt="">
-    <img id="imgSmokeExplosion" src="./assets/images/smokeExplosion.png" alt="">
-    <img id="imgShield" src="./assets/images/shield.png" alt="">
+                <canvas id="canvas" class="game-canvas"></canvas>
+
+                <!-- layers -->
+                <img id="imgLayer1" src="./assets/images/layer1.png" alt="">
+                <img id="imgLayer2" src="./assets/images/layer2.png" alt="">
+                <img id="imgLayer3" src="./assets/images/layer3.png" alt="">
+                <img id="imgLayer4" src="./assets/images/layer4.png" alt="">
+
+                <!-- characters -->
+                <img id="imgPlayer" src="./assets/images/player.png" alt="">
+                <img id="imgAngler1" src="./assets/images/angler1.png" alt="">
+                <img id="imgAngler2" src="./assets/images/angler2.png" alt="">
+                <img id="imgLucky" src="./assets/images/lucky.png" alt="">
+                <img id="imgHiveWhale" src="./assets/images/hivewhale.png" alt="">
+                <img id="imgDrone" src="./assets/images/drone.png" alt="">
+                <img id="imgBulbWhale" src="./assets/images/bulbwhale.png" alt="">
+                <img id="imgMoonFish" src="./assets/images/moonfish.png" alt="">
+                <img id="imgStalker" src="./assets/images/stalker.png" alt="">
+                <img id="imgRazorFin" src="./assets/images/razorfin.png" alt="">
+
+                <!-- props -->
+                <img id="imgProjectile" src="./assets/images/projectile.png" alt="">
+                <img id="imgFireball" src="./assets/images/fireball.png" alt="">
+                <img id="imgGears" src="./assets/images/gears.png" alt="">
+                <img id="imgFireExplosion" src="./assets/images/fireExplosion.png" alt="">
+                <img id="imgSmokeExplosion" src="./assets/images/smokeExplosion.png" alt="">
+                <img id="imgShield" src="./assets/images/shield.png" alt="">
 
 
-    <!-- sounds -->
-    <audio id="audioPowerUp" src="assets/sounds/powerup.wav"></audio>
-    <audio id="audioPowerDown" src="assets/sounds/powerdown.wav"></audio>
-    <audio id="audioShot" src="assets/sounds/shot.wav"></audio>
-    <audio id="audioPoof" src="assets/sounds/poof.mp3"></audio>
-    <audio id="audioShield" src="assets/sounds/shield.wav"></audio>
-    <audio id="audioExplosion" src="assets/sounds/explosion.wav"></audio>
+                <!-- sounds -->
+                <audio id="audioPowerUp" src="assets/sounds/powerup.wav"></audio>
+                <audio id="audioPowerDown" src="assets/sounds/powerdown.wav"></audio>
+                <audio id="audioShot" src="assets/sounds/shot.wav"></audio>
+                <audio id="audioPoof" src="assets/sounds/poof.mp3"></audio>
+                <audio id="audioShield" src="assets/sounds/shield.wav"></audio>
+                <audio id="audioExplosion" src="assets/sounds/explosion.wav"></audio>
+        </section>
 
-    <canvas id="canvas"></canvas>
 
-    <div class="github-banner">
-        <a href="https://github.com/KarenOk/alien-invaders-game" target="_blank" class="github-link">
-            <img src="./assets/icons/github.svg" alt="Fork me on Github"></img></a>
-    </div>
+        <section id="splashscreen" class="splashscreen">
+                <h1 class="splashscreen__title"> Alien <br> Invaders </h1>
+                <div class="splashscreen__welcome">
+                        <span>Welcome, </span>
+                        <div class="username">
+                                <div class="username__content username__display center">
+                                        <span class="username__value">Player12345788900</span>!
+                                        <button class="changeUsernameBtn" title="Change username"> <i
+                                                        class="fa-solid fa-user-pen"></i></button>
+                                </div>
+                                <form class="username__content username__form center hidden">
+                                        <input class="username__entry" required name="username" />
+                                        <button class="saveUsernameBtn" title="Save username"><i
+                                                        class="fa-solid fa-floppy-disk"></i></i></button>
+                                </form>
+                        </div>
+                </div>
+                <div class="splashscreen__actions">
+                        <button class="startBtn icon-button icon-button--circle"><i class="fa-solid fa-play"
+                                        title="Play Game"></i></button>
+                        <button class="muteBtn icon-button icon-button--circle"><i class="fa-solid fa-volume-xmark"
+                                        title="Mute Game"></i></button>
+                        <button class="icon-button icon-button--circle"><i class="fa-solid fa-question"
+                                        title="Game Help"></i></button>
+                        <button class="icon-button icon-button--circle"><i class="fa-solid fa-trophy"
+                                        title="Leaderboard"></i></button>
+                </div>
+        </section>
 
-    <script src="./script.js"></script>
+        <script src="./script.js"></script>
 </body>
 
 </html>
