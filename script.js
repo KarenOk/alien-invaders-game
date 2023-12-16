@@ -71,7 +71,7 @@ const ENEMY_EXPLOSION_HEIGHT = 200;
 
 const PROJECTILE_WIDTH = 28;
 const PROJECTILE_HEIGHT = 10;
-const PROJECTILE_FIREBALL_WIDTH = 37;
+const PROJECTILE_FIREBALL_WIDTH = 36.25;
 const PROJECTILE_FIREBALL_HEIGHT = 20;
 const PROJECTILE_OFFSET_X = 98;
 const PROJECTILE_TOP_OFFSET_Y = 28;
@@ -275,7 +275,7 @@ window.addEventListener("load", () => {
 
 			this.currentFrameX = 0;
 			this.currentFrameY = 0;
-			this.totalFramesX = IMG_FIREBALL_FULL_WIDTH / PROJECTILE_WIDTH;
+			this.totalFramesX = IMG_FIREBALL_FULL_WIDTH / PROJECTILE_FIREBALL_WIDTH;
 
 			this.fps = 20;
 			this.timer = 0;
@@ -408,7 +408,7 @@ window.addEventListener("load", () => {
 		update(deltaTime) {
 			this.#handleKeyPress();
 			this.#updateImage();
-			this.#updateProjectiles();
+			this.#updateProjectiles(deltaTime);
 			this.#updatePoweredUp(deltaTime);
 		}
 
@@ -490,9 +490,9 @@ window.addEventListener("load", () => {
 			);
 		}
 
-		#updateProjectiles() {
+		#updateProjectiles(deltaTime) {
 			this.projectiles.forEach((projectile) => {
-				projectile.update(context);
+				projectile.update(deltaTime);
 			});
 			this.projectiles = this.projectiles.filter(
 				(projectile) => !projectile.markedForDeletion
@@ -1292,13 +1292,13 @@ window.addEventListener("load", () => {
 	const gameScreen = document.getElementById("game");
 	const startBtn = document.querySelector(".startBtn");
 	const restartBtn = document.querySelector(".restartBtn");
+	const helpBtns = document.querySelectorAll(".helpBtn");
 	const playButton = document.querySelector(".playBtn");
 	const pauseButton = document.querySelector(".pauseBtn");
 	const muteButton = document.querySelector(".muteBtn");
 	const unmuteButton = document.querySelector(".unmuteBtn");
 	const username = document.querySelector(".username");
 	const changeUsernameBtn = username.querySelector(".changeUsernameBtn");
-	const saveUsernameBtn = username.querySelector(".saveUsernameBtn");
 	const usernameValue = username.querySelector(".username__value");
 	const usernameEntry = username.querySelector(".username__entry");
 	const usernameDisplay = username.querySelector(".username__display");
@@ -1370,7 +1370,7 @@ window.addEventListener("load", () => {
 		usernameDisplay.classList.add("hidden");
 	}
 
-	function handleUsernameSubmitClicked(e) {
+	function handleUsernameSubmit(e) {
 		console.log("submitting");
 		e.preventDefault();
 		console.log("submited");
@@ -1378,6 +1378,22 @@ window.addEventListener("load", () => {
 		usernameValue.innerText = usernameEntry.value;
 		usernameForm.classList.add("hidden");
 		usernameDisplay.classList.remove("hidden");
+	}
+
+	const modal = document.getElementById("modal");
+	const modalCloseBtn = document.getElementById("modalClose");
+
+	function hideModal() {
+		modal.classList.add("hidden");
+	}
+
+	function showModal() {
+		modal.classList.remove("hidden");
+		currentGame?.pause();
+	}
+
+	function handleHelpBtnClicked() {
+		showModal();
 	}
 
 	initLocalStorage();
@@ -1391,5 +1407,65 @@ window.addEventListener("load", () => {
 	unmuteButton.addEventListener("click", handleMuteOrUnmuteClicked);
 	muteButton.addEventListener("click", handleMuteOrUnmuteClicked);
 	changeUsernameBtn.addEventListener("click", handleChangeUsernameBtnClicked);
-	usernameForm.addEventListener("submit", handleUsernameSubmitClicked);
+	usernameForm.addEventListener("submit", handleUsernameSubmit);
+	helpBtns.forEach((btn) =>
+		btn.addEventListener("click", handleHelpBtnClicked)
+	);
+
+	modalCloseBtn.addEventListener("click", hideModal);
+	window.onclick = function (event) {
+		if (event.target == modal) {
+			hideModal();
+		}
+	};
+
+	// Help Modal
+
+	const helpNavItems = document.querySelectorAll(".help__nav li");
+	const helpTabs = document.querySelectorAll(".help__tab");
+	const helpGoalNav = document.querySelector(".help__goal--nav");
+	const helpGamePlayNav = document.querySelector(".help__game-play--nav");
+	const helpCharactersNav = document.querySelector(".help__characters--nav");
+	const helpGoalSection = document.querySelector(".help__goal");
+	const helpGamePlaySection = document.querySelector(".help__game-play");
+	const helpCharactersSection = document.querySelector(".help__characters");
+
+	const HELP_GOAL_TAB = "goal";
+	const HELP_GAME_PLAY_TAB = "game-play";
+	const HELP_CHARACTERS_TAB = "characters";
+
+	helpGoalNav.addEventListener("click", () =>
+		handleHelpNavigation(HELP_GOAL_TAB)
+	);
+
+	helpGamePlayNav.addEventListener("click", () =>
+		handleHelpNavigation(HELP_GAME_PLAY_TAB)
+	);
+
+	helpCharactersNav.addEventListener("click", () =>
+		handleHelpNavigation(HELP_CHARACTERS_TAB)
+	);
+
+	function handleHelpNavigation(tab) {
+		helpNavItems.forEach((navItem) => navItem.classList.remove("active"));
+		helpTabs.forEach((navItem) => navItem.classList.add("hidden"));
+
+		switch (tab) {
+			case HELP_GOAL_TAB: {
+				helpGoalNav.classList.add("active");
+				helpGoalSection.classList.remove("hidden");
+				break;
+			}
+			case HELP_GAME_PLAY_TAB: {
+				helpGamePlayNav.classList.add("active");
+				helpGamePlaySection.classList.remove("hidden");
+				break;
+			}
+			case HELP_CHARACTERS_TAB: {
+				helpCharactersNav.classList.add("active");
+				helpCharactersSection.classList.remove("hidden");
+				break;
+			}
+		}
+	}
 });

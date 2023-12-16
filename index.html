@@ -33,7 +33,7 @@
                                         title="Mute Game"></i></button>
                         <button class="unmuteBtn icon-button icon-button--circle hidden"><i
                                         class="fa-solid fa-volume-high" title="Unmute Game"></i></button>
-                        <button class="icon-button icon-button--circle"><i class="fa-solid fa-question"
+                        <button class="helpBtn icon-button icon-button--circle"><i class="fa-solid fa-question"
                                         title="Game Help"></i></button>
                         <button class="icon-button icon-button--circle"><i class="fa-solid fa-trophy"
                                         title="Leaderboard"></i></button>
@@ -48,24 +48,24 @@
                 <img id="imgLayer4" src="./assets/images/layer4.png" alt="">
 
                 <!-- characters -->
-                <img id="imgPlayer" src="./assets/images/player.png" alt="">
-                <img id="imgAngler1" src="./assets/images/angler1.png" alt="">
-                <img id="imgAngler2" src="./assets/images/angler2.png" alt="">
-                <img id="imgLucky" src="./assets/images/lucky.png" alt="">
-                <img id="imgHiveWhale" src="./assets/images/hivewhale.png" alt="">
-                <img id="imgDrone" src="./assets/images/drone.png" alt="">
-                <img id="imgBulbWhale" src="./assets/images/bulbwhale.png" alt="">
-                <img id="imgMoonFish" src="./assets/images/moonfish.png" alt="">
-                <img id="imgStalker" src="./assets/images/stalker.png" alt="">
-                <img id="imgRazorFin" src="./assets/images/razorfin.png" alt="">
+                <img id="imgPlayer" src="./assets/images/sprites/player.png" alt="">
+                <img id="imgAngler1" src="./assets/images/sprites/angler1.png" alt="">
+                <img id="imgAngler2" src="./assets/images/sprites/angler2.png" alt="">
+                <img id="imgLucky" src="./assets/images/sprites/lucky.png" alt="">
+                <img id="imgHiveWhale" src="./assets/images/sprites/hivewhale.png" alt="">
+                <img id="imgDrone" src="./assets/images/sprites/drone.png" alt="">
+                <img id="imgBulbWhale" src="./assets/images/sprites/bulbwhale.png" alt="">
+                <img id="imgMoonFish" src="./assets/images/sprites/moonfish.png" alt="">
+                <img id="imgStalker" src="./assets/images/sprites/stalker.png" alt="">
+                <img id="imgRazorFin" src="./assets/images/sprites/razorfin.png" alt="">
 
                 <!-- props -->
                 <img id="imgProjectile" src="./assets/images/projectile.png" alt="">
-                <img id="imgFireball" src="./assets/images/fireball.png" alt="">
-                <img id="imgGears" src="./assets/images/gears.png" alt="">
-                <img id="imgFireExplosion" src="./assets/images/fireExplosion.png" alt="">
-                <img id="imgSmokeExplosion" src="./assets/images/smokeExplosion.png" alt="">
-                <img id="imgShield" src="./assets/images/shield.png" alt="">
+                <img id="imgFireball" src="./assets/images/sprites/fireball.png" alt="">
+                <img id="imgGears" src="./assets/images/sprites/gears.png" alt="">
+                <img id="imgFireExplosion" src="./assets/images/sprites/fireExplosion.png" alt="">
+                <img id="imgSmokeExplosion" src="./assets/images/sprites/smokeExplosion.png" alt="">
+                <img id="imgShield" src="./assets/images/sprites/shield.png" alt="">
 
 
                 <!-- sounds -->
@@ -76,7 +76,6 @@
                 <audio id="audioShield" src="assets/sounds/shield.wav"></audio>
                 <audio id="audioExplosion" src="assets/sounds/explosion.wav"></audio>
         </section>
-
 
         <section id="splashscreen" class="splashscreen">
                 <h1 class="splashscreen__title"> Alien <br> Invaders </h1>
@@ -100,12 +99,247 @@
                                         title="Play Game"></i></button>
                         <button class="muteBtn icon-button icon-button--circle"><i class="fa-solid fa-volume-xmark"
                                         title="Mute Game"></i></button>
-                        <button class="icon-button icon-button--circle"><i class="fa-solid fa-question"
+                        <button class="helpBtn icon-button icon-button--circle"><i class="fa-solid fa-question"
                                         title="Game Help"></i></button>
-                        <button class="icon-button icon-button--circle"><i class="fa-solid fa-trophy"
+                        <button class="leaderboardBtn icon-button icon-button--circle"><i class="fa-solid fa-trophy"
                                         title="Leaderboard"></i></button>
                 </div>
         </section>
+
+        <div id="modal" class="modal">
+                <div class="modal-content">
+                        <button id="modalClose" class="modal-close"><i class="fa-regular fa-circle-xmark"
+                                        title="Close Popup"></i></button>
+
+
+                        <section id="help" class="help">
+                                <h1 class="help__header">HOW TO PLAY</h1>
+                                <div class="help__content">
+                                        <nav class="help__nav">
+                                                <ul>
+                                                        <li class="help__goal--nav active">Goal </li>
+                                                        <li class="help__game-play--nav">Game Play </li>
+                                                        <li class="help__characters--nav">Characters </li>
+                                                </ul>
+                                        </nav>
+
+                                        <article class="help__tab help__goal">
+                                                <h2> Goal </h2>
+
+                                                <p>
+                                                        The goal of this game is to score at least <span
+                                                                class="placeholder score">40</span> points
+                                                        within
+                                                        <span class="placeholder timer">40</span> seconds.
+                                                </p>
+                                                <br>
+                                                <p>Can you? 😉 </p>
+                                        </article>
+
+                                        <article class="help__tab help__game-play hidden">
+                                                <h2> Game Play </h2>
+                                                <p> Using the keyboard, navigate the sentinel horse to shoot and kill
+                                                        enemies.
+                                                        Keep track
+                                                        of your remaining ammo, countdown timer and score at the top
+                                                        left corner
+                                                        of your screen.</p>
+
+                                                <h3> Keys </h3>
+                                                <table>
+                                                        <tr>
+                                                                <td> ⬆️ </td>
+                                                                <td> Move player upwards </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> ⬅️ </td>
+                                                                <td> Move player to the right </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> ➡️ </td>
+                                                                <td> Move player to the left </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> ⬇️ </td>
+                                                                <td> Move player downwards </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> SPACEBAR </td>
+                                                                <td> Shoot ammo </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> P </td>
+                                                                <td> Toggle pause/play </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> M </td>
+                                                                <td> Toggle game volume off/on </td>
+                                                        </tr>
+                                                </table>
+
+                                                <h3> Game Stats</h3>
+                                                <img src="./assets/images/gameStats.png" alt="Game stats" />
+                                                <ul>
+                                                        <li>1 - Current Score</li>
+                                                        <li>2 - Amount of time left</li>
+                                                        <li>3 - Amount of ammo left</li>
+                                                </ul>
+
+                                        </article>
+
+                                        <article class="help__tab help__characters hidden">
+                                                <h2> Characters </h2>
+                                                <table>
+                                                        <tr>
+                                                                <td> <img src="./assets/images/characters/player.png"
+                                                                                alt=""> </td>
+                                                                <td>
+                                                                        <strong> PLAYER</strong> <br><br>
+                                                                        <p> Lorem ipsum dolor sit amet, consectetur
+                                                                                adipiscing
+                                                                                elit, sed do eiusmod tempor incididunt
+                                                                                ut labore
+                                                                                et dolore magna aliqua.
+                                                                        </p>
+                                                                </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> <img src="./assets/images/characters/player-powerup.png"
+                                                                                alt=""> </td>
+                                                                <td>
+                                                                        <strong> PLAYER (POWERED-UP)</strong> <br><br>
+                                                                        <p> Lorem ipsum dolor sit amet, consectetur
+                                                                                adipiscing
+                                                                                elit, sed do eiusmod tempor incididunt
+                                                                                ut labore
+                                                                                et dolore magna aliqua.
+                                                                        </p>
+                                                                </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> <img src="./assets/images/characters/angler1.png"
+                                                                                alt=""> </td>
+                                                                <td>
+                                                                        <strong> ANGLER 1</strong> <br><br>
+                                                                        <p> Lorem ipsum dolor sit amet, consectetur
+                                                                                adipiscing
+                                                                                elit, sed do eiusmod tempor incididunt
+                                                                                ut labore
+                                                                                et dolore magna aliqua.
+                                                                        </p>
+                                                                </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> <img src="./assets/images/characters/angler2.png"
+                                                                                alt=""> </td>
+                                                                <td>
+                                                                        <strong> ANGLER 2</strong> <br><br>
+                                                                        <p> Lorem ipsum dolor sit amet, consectetur
+                                                                                adipiscing
+                                                                                elit, sed do eiusmod tempor incididunt
+                                                                                ut labore
+                                                                                et dolore magna aliqua.
+                                                                        </p>
+                                                                </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> <img src="./assets/images/characters/lucky.png"
+                                                                                alt=""> </td>
+                                                                <td>
+                                                                        <strong> LUCKY</strong> <br><br>
+                                                                        <p> Lorem ipsum dolor sit amet, consectetur
+                                                                                adipiscing
+                                                                                elit, sed do eiusmod tempor incididunt
+                                                                                ut labore
+                                                                                et dolore magna aliqua.
+                                                                        </p>
+                                                                </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> <img src="./assets/images/characters/moonfish.png"
+                                                                                alt=""> </td>
+                                                                <td>
+                                                                        <strong> MOONFISH</strong> <br><br>
+                                                                        <p> Lorem ipsum dolor sit amet, consectetur
+                                                                                adipiscing
+                                                                                elit, sed do eiusmod tempor incididunt
+                                                                                ut labore
+                                                                                et dolore magna aliqua.
+                                                                        </p>
+                                                                </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> <img src="./assets/images/characters/stalker.png"
+                                                                                alt=""> </td>
+                                                                <td>
+                                                                        <strong> STALKER</strong> <br><br>
+                                                                        <p> Lorem ipsum dolor sit amet, consectetur
+                                                                                adipiscing
+                                                                                elit, sed do eiusmod tempor incididunt
+                                                                                ut labore
+                                                                                et dolore magna aliqua.
+                                                                        </p>
+                                                                </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> <img src="./assets/images/characters/bulbwhale.png"
+                                                                                alt=""> </td>
+                                                                <td>
+                                                                        <strong> BULB WHALE</strong> <br><br>
+                                                                        <p> Lorem ipsum dolor sit amet, consectetur
+                                                                                adipiscing
+                                                                                elit, sed do eiusmod tempor incididunt
+                                                                                ut labore
+                                                                                et dolore magna aliqua.
+                                                                        </p>
+                                                                </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> <img src="./assets/images/characters/drone.png"
+                                                                                alt=""> </td>
+                                                                <td>
+                                                                        <strong> DRONE</strong> <br><br>
+                                                                        <p> Lorem ipsum dolor sit amet, consectetur
+                                                                                adipiscing
+                                                                                elit, sed do eiusmod tempor incididunt
+                                                                                ut labore
+                                                                                et dolore magna aliqua.
+                                                                        </p>
+                                                                </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> <img src="./assets/images/characters/razorfin.png"
+                                                                                alt=""> </td>
+                                                                <td>
+                                                                        <strong> RAZOR FIN</strong> <br><br>
+                                                                        <p> Lorem ipsum dolor sit amet, consectetur
+                                                                                adipiscing
+                                                                                elit, sed do eiusmod tempor incididunt
+                                                                                ut labore
+                                                                                et dolore magna aliqua.
+                                                                        </p>
+                                                                </td>
+                                                        </tr>
+                                                        <tr>
+                                                                <td> <img src="./assets/images/characters/hivewhale.png"
+                                                                                alt=""> </td>
+                                                                <td>
+                                                                        <strong> HIVE WHALE</strong> <br><br>
+                                                                        <p> Lorem ipsum dolor sit amet, consectetur
+                                                                                adipiscing
+                                                                                elit, sed do eiusmod tempor incididunt
+                                                                                ut labore
+                                                                                et dolore magna aliqua.
+                                                                        </p>
+                                                                </td>
+                                                        </tr>
+                                                </table>
+
+                                        </article>
+                                </div>
+                        </section>
+                </div>
+        </div>
 
         <script src="./script.js"></script>
 </body>

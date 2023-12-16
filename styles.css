@@ -39,6 +39,12 @@ button {
     display: none !important;
 }
 
+ul {
+    list-style: none;
+    padding: 0;
+}
+
+
 
 /* Github Banner */
 
@@ -139,9 +145,138 @@ button {
 }
 
 
-
 .username button {
     margin-left: 5px;
     font-size: 1em;
 
+}
+
+/* Modal */
+
+
+.modal {
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 38, 66, 0.7)
+}
+
+.modal-content {
+    position: relative;
+    background: #ffffbd;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    height: 80%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-width: 500px;
+}
+
+.modal-close {
+    color: red;
+    font-size: 25px;
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    transition: transform ease-in 0.5s;
+}
+
+.modal-close:hover,
+.modal-close:focus {
+    transform: rotate(180deg);
+}
+
+/*  Modal Content - Help */
+
+.help {
+    font-size: 14px;
+    min-height: 90%;
+}
+
+.help .help__header {
+    margin-bottom: 20px;
+}
+
+.help__content {
+    display: flex;
+    padding-right: 20px;
+    height: 100%;
+}
+
+.help__nav {
+    border-right: 1px solid black;
+    padding-right: 10px;
+}
+
+
+.help__nav li {
+    padding: 10px;
+    cursor: pointer;
+}
+
+
+.help__nav li.active {
+    border-left: 2px solid black;
+    background-color: rgba(30, 74, 127, 0.2);
+
+}
+
+.help__tab {
+    width: 100%;
+    padding-left: 15px;
+    padding-bottom: 30px;
+}
+
+
+.help h2 {
+    margin-bottom: 10px;
+}
+
+.help h3 {
+    margin-bottom: 5px;
+    margin-top: 20px;
+}
+
+.help__game-play table {
+    border-collapse: collapse;
+}
+
+.help__game-play td {
+    border: 1px solid black;
+    padding: 10px;
+}
+
+.help__game-play li:nth-of-type(1) {
+    color: #FF6055;
+}
+
+.help__game-play li:nth-of-type(2) {
+    color: #3AB954;
+}
+
+.help__game-play li:nth-of-type(3) {
+    color: #FFAD4C;
+}
+
+.help__game-play img {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.help__characters img {
+    width: 50px;
+}
+
+.help__characters table {
+    border-collapse: collapse;
+}
+
+.help__characters td {
+    border: 1px solid black;
+    padding: 10px;
 }
