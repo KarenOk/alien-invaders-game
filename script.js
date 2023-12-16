@@ -176,11 +176,6 @@ const KEY_MUTE = "m";
  */
 
 window.addEventListener("load", () => {
-	const canvas = document.getElementById("canvas");
-	canvas.width = CANVAS_WIDTH;
-	canvas.height = CANVAS_HEIGHT;
-	const context = canvas.getContext("2d");
-
 	class InputHandler {
 		constructor(game) {
 			this.game = game;
@@ -290,15 +285,15 @@ window.addEventListener("load", () => {
 
 			if (this.timer >= this.interval) {
 				this.timer = 0;
-				if (this.currentFrameX < this.totalFramesX) this.currentFrameX++;
-				else this.currentFrameX = 0;
+				this.currentFrameX += 1;
+				if (this.currentFrameX >= this.totalFramesX) this.currentFrameX = 0;
 			} else {
 				this.timer += deltaTime;
 			}
 		}
-		draw(context) {
-			context.fillStyle = "yellow";
-			context.drawImage(
+		draw() {
+			this.game.context.fillStyle = "yellow";
+			this.game.context.drawImage(
 				this.image,
 				this.currentFrameX * this.width,
 				this.currentFrameY,
@@ -363,12 +358,12 @@ window.addEventListener("load", () => {
 				this.markedForDeletion = true;
 			}
 		}
-		draw(context) {
-			context.save();
-			context.translate(this.x, this.y);
-			context.rotate(this.angle);
+		draw() {
+			this.game.context.save();
+			this.game.context.translate(this.x, this.y);
+			this.game.context.rotate(this.angle);
 
-			context.drawImage(
+			this.game.context.drawImage(
 				this.image,
 				this.currentFrameX * PARTICLE_WIDTH,
 				this.currentFrameY * PARTICLE_HEIGHT,
@@ -379,7 +374,7 @@ window.addEventListener("load", () => {
 				this.size,
 				this.size
 			);
-			context.restore();
+			this.game.context.restore();
 		}
 	}
 
@@ -412,8 +407,8 @@ window.addEventListener("load", () => {
 			this.#updatePoweredUp(deltaTime);
 		}
 
-		draw(context) {
-			context.fillStyle = "black";
+		draw() {
+			this.game.context.fillStyle = "black";
 
 			this.#drawImage();
 			this.#drawProjectiles();
@@ -475,9 +470,9 @@ window.addEventListener("load", () => {
 
 		#drawImage() {
 			if (this.game.debugMode) {
-				context.strokeRect(this.x, this.y, this.width, this.height);
+				this.game.context.strokeRect(this.x, this.y, this.width, this.height);
 			}
-			context.drawImage(
+			this.game.context.drawImage(
 				this.image,
 				this.currentFrameX * this.width,
 				this.currentFrameY * this.height,
@@ -501,7 +496,7 @@ window.addEventListener("load", () => {
 
 		#drawProjectiles() {
 			this.projectiles.forEach((projectile) => {
-				projectile.draw(context);
+				projectile.draw();
 			});
 		}
 
@@ -538,21 +533,21 @@ window.addEventListener("load", () => {
 			if (this.currentFrameX >= this.totalFramesX) this.currentFrameX = 0;
 		}
 
-		draw(context) {
+		draw() {
 			if (this.game.debugMode) {
-				context.save();
-				context.fillStyle = context.strokeStyle = "red";
-				context.fillText(
+				this.game.context.save();
+				this.game.context.fillStyle = this.game.context.strokeStyle = "red";
+				this.game.context.fillText(
 					this.lives,
 					this.x,
 					this.y - 5,
 					this.width,
 					this.height
 				);
-				context.strokeRect(this.x, this.y, this.width, this.height);
-				context.restore();
+				this.game.context.strokeRect(this.x, this.y, this.width, this.height);
+				this.game.context.restore();
 			}
-			context.drawImage(
+			this.game.context.drawImage(
 				this.image,
 				this.currentFrameX * this.width,
 				this.currentFrameY * this.height,
@@ -768,8 +763,8 @@ window.addEventListener("load", () => {
 			}
 		}
 
-		draw(context) {
-			context.drawImage(
+		draw() {
+			this.game.context.drawImage(
 				this.image,
 				this.currentFrameX * ENEMY_EXPLOSION_WIDTH,
 				this.currentFrameY,
@@ -826,9 +821,9 @@ window.addEventListener("load", () => {
 			}
 		}
 
-		draw(context) {
+		draw() {
 			if (this.currentFrameX < this.totalFramesX) {
-				context.drawImage(
+				this.game.context.drawImage(
 					this.image,
 					this.currentFrameX * this.width,
 					this.currentFrameY,
@@ -861,9 +856,9 @@ window.addEventListener("load", () => {
 			this.x += this.speedX; // may need a multiplier with game speed in power up mode
 			if (this.x < -this.width) this.x = 0;
 		}
-		draw(context) {
-			context.drawImage(this.image, this.x, this.y);
-			context.drawImage(this.image, this.x + this.width, this.y);
+		draw() {
+			this.game.context.drawImage(this.image, this.x, this.y);
+			this.game.context.drawImage(this.image, this.x + this.width, this.y);
 		}
 	}
 
@@ -900,9 +895,9 @@ window.addEventListener("load", () => {
 			});
 		}
 
-		draw(context) {
+		draw() {
 			this.layers.forEach((layer) => {
-				layer.draw(context);
+				layer.draw();
 			});
 		}
 	}
@@ -916,28 +911,28 @@ window.addEventListener("load", () => {
 			this.fontSize = DISPLAY_FONT_SIZE;
 		}
 
-		draw(context) {
-			context.font = `${this.fontSize}px ${this.fontFamily}`;
-			context.fillStyle = this.color;
+		draw() {
+			this.game.context.font = `${this.fontSize}px ${this.fontFamily}`;
+			this.game.context.fillStyle = this.color;
 
-			context.save();
-			context.shadowColor = "black";
-			context.shadowOffsetX = 2;
-			context.shadowOffsetY = 2;
+			this.game.context.save();
+			this.game.context.shadowColor = "black";
+			this.game.context.shadowOffsetX = 2;
+			this.game.context.shadowOffsetY = 2;
 
-			this.#drawScore(context);
-			this.#drawTimer(context);
-			this.#drawAmmo(context);
+			this.#drawScore();
+			this.#drawTimer();
+			this.#drawAmmo();
 			if (this.game.paused) {
-				this.#drawPaused(context);
+				this.#drawPaused();
 			} else {
-				this.#drawGameOver(context);
+				this.#drawGameOver();
 			}
-			context.restore();
+			this.game.context.restore();
 		}
 
-		#drawScore(context) {
-			context.fillText(
+		#drawScore() {
+			this.game.context.fillText(
 				`Score: ${this.game.score}`,
 				DISPLAY_SCORE_OFFSET_X,
 				DISPLAY_SCORE_OFFSET_Y,
@@ -946,7 +941,7 @@ window.addEventListener("load", () => {
 			);
 		}
 
-		#drawGameOver(context) {
+		#drawGameOver() {
 			if (!this.game.gameOver) return;
 
 			let mainText;
@@ -960,11 +955,11 @@ window.addEventListener("load", () => {
 				secText = GAMEOVER_MSG_LOSS_SEC_TEXT;
 			}
 
-			context.textAlign = "center";
-			context.fillStyle = this.color;
+			this.game.context.textAlign = "center";
+			this.game.context.fillStyle = this.color;
 
-			context.font = `60px ${this.fontFamily}`;
-			context.fillText(
+			this.game.context.font = `60px ${this.fontFamily}`;
+			this.game.context.fillText(
 				mainText,
 				this.game.width / 2,
 				this.game.height / 2 - DISPLAY_GAMEOVER_TEXT_OFFSET_Y,
@@ -972,8 +967,8 @@ window.addEventListener("load", () => {
 				this.game.height
 			);
 
-			context.font = `20px ${this.fontFamily}`;
-			context.fillText(
+			this.game.context.font = `20px ${this.fontFamily}`;
+			this.game.context.fillText(
 				secText,
 				this.game.width / 2,
 				this.game.height / 2 + DISPLAY_GAMEOVER_TEXT_OFFSET_Y,
@@ -982,12 +977,12 @@ window.addEventListener("load", () => {
 			);
 		}
 
-		#drawPaused(context) {
-			context.textAlign = "center";
-			context.fillColor = this.color;
-			context.font = `60px ${this.fontFamily}`;
+		#drawPaused() {
+			this.game.context.textAlign = "center";
+			this.game.context.fillColor = this.color;
+			this.game.context.font = `60px ${this.fontFamily}`;
 
-			context.fillText(
+			this.game.context.fillText(
 				"Paused...",
 				this.game.width / 2,
 				this.game.height / 2,
@@ -996,16 +991,16 @@ window.addEventListener("load", () => {
 			);
 		}
 
-		#drawTimer(context) {
+		#drawTimer() {
 			let timeLeftMs = this.game.maxGameTime - this.game.gameTimer;
 			if (timeLeftMs < 0) timeLeftMs = 0;
 
 			if (timeLeftMs < this.game.maxGameTime * 0.2) {
-				context.fillStyle = DISPLAY_TIMER_DANGER_COLOR;
+				this.game.context.fillStyle = DISPLAY_TIMER_DANGER_COLOR;
 			}
 
 			const formattedTime = (timeLeftMs / ONE_SECOND_MS).toFixed(1);
-			context.fillText(
+			this.game.context.fillText(
 				`Time left: ${formattedTime}s`,
 				DISPLAY_TIMER_OFFSET_X,
 				DISPLAY_TIMER_OFFSET_Y,
@@ -1014,13 +1009,13 @@ window.addEventListener("load", () => {
 			);
 		}
 
-		#drawAmmo(context) {
+		#drawAmmo() {
 			if (this.game.player.poweredUp)
-				context.fillStyle = DISPLAY_AMMO_POWERUP_COLOR;
-			else context.fillStyle = this.color;
+				this.game.context.fillStyle = DISPLAY_AMMO_POWERUP_COLOR;
+			else this.game.context.fillStyle = this.color;
 
 			for (let i = 0; i < this.game.ammo; i++) {
-				context.fillRect(
+				this.game.context.fillRect(
 					DISPLAY_AMMO_OFFSET_X + DISPLAY_AMMO_SPACING * i,
 					DISPLAY_AMMO_OFFSET_Y,
 					DISPLAY_AMMO_WIDTH,
@@ -1031,9 +1026,10 @@ window.addEventListener("load", () => {
 	}
 
 	class Game {
-		constructor(width, height) {
+		constructor(width, height, context) {
 			this.width = width;
 			this.height = height;
+			this.context = context;
 			this.gameOver = false;
 			this.debugMode = false;
 			this.speed = 1;
@@ -1081,14 +1077,14 @@ window.addEventListener("load", () => {
 		}
 
 		draw() {
-			this.background.draw(context);
-			this.player.draw(context);
-			this.shield.draw(context);
-			this.#drawParticles(context);
-			this.#drawEnemies(context);
-			this.#drawExplosions(context);
-			this.ui.draw(context);
-			this.background.layer4.draw(context);
+			this.background.draw();
+			this.player.draw();
+			this.shield.draw();
+			this.#drawParticles();
+			this.#drawEnemies();
+			this.#drawExplosions();
+			this.ui.draw();
+			this.background.layer4.draw();
 		}
 
 		play() {
@@ -1141,9 +1137,9 @@ window.addEventListener("load", () => {
 			}
 		}
 
-		#drawEnemies(context) {
+		#drawEnemies() {
 			this.enemies.forEach((enemy) => {
-				enemy.draw(context);
+				enemy.draw();
 			});
 		}
 
@@ -1241,9 +1237,9 @@ window.addEventListener("load", () => {
 			);
 		}
 
-		#drawParticles(context) {
+		#drawParticles() {
 			this.particles.forEach((particle) => {
-				particle.draw(context);
+				particle.draw();
 			});
 		}
 
@@ -1256,12 +1252,18 @@ window.addEventListener("load", () => {
 			);
 		}
 
-		#drawExplosions(context) {
+		#drawExplosions() {
 			this.explosions.forEach((explosion) => {
-				explosion.draw(context);
+				explosion.draw();
 			});
 		}
 	}
+
+	// Setup Game
+	const canvas = document.getElementById("canvas");
+	canvas.width = CANVAS_WIDTH;
+	canvas.height = CANVAS_HEIGHT;
+	const context = canvas.getContext("2d");
 
 	let animationFrameRequestId = null;
 	let currentGame = null;
@@ -1272,7 +1274,7 @@ window.addEventListener("load", () => {
 			animationFrameRequestId = null;
 		}
 
-		currentGame = new Game(CANVAS_WIDTH, CANVAS_HEIGHT);
+		currentGame = new Game(CANVAS_WIDTH, CANVAS_HEIGHT, context);
 		let lastTime;
 
 		function animate(currentTime) {
@@ -1288,6 +1290,30 @@ window.addEventListener("load", () => {
 		animate(0);
 	}
 
+	// Setup Modal
+	const modal = document.getElementById("modal");
+	const modalCloseBtn = document.getElementById("modalClose");
+
+	function hideModal() {
+		modal.classList.add("hidden");
+		currentGame?.play();
+		togglePausePlayBtns(false);
+	}
+
+	function showModal() {
+		modal.classList.remove("hidden");
+		currentGame?.pause();
+		togglePausePlayBtns(true);
+	}
+
+	modalCloseBtn.addEventListener("click", hideModal);
+	window.onclick = function (event) {
+		if (event.target == modal) {
+			hideModal();
+		}
+	};
+
+	// Setup Controls
 	const splashScreen = document.getElementById("splashscreen");
 	const gameScreen = document.getElementById("game");
 	const startBtn = document.querySelector(".startBtn");
@@ -1297,25 +1323,6 @@ window.addEventListener("load", () => {
 	const pauseButton = document.querySelector(".pauseBtn");
 	const muteButton = document.querySelector(".muteBtn");
 	const unmuteButton = document.querySelector(".unmuteBtn");
-	const username = document.querySelector(".username");
-	const changeUsernameBtn = username.querySelector(".changeUsernameBtn");
-	const usernameValue = username.querySelector(".username__value");
-	const usernameEntry = username.querySelector(".username__entry");
-	const usernameDisplay = username.querySelector(".username__display");
-	const usernameForm = username.querySelector(".username__form");
-
-	function getRandomId() {
-		const uint32 = window.crypto.getRandomValues(new Uint32Array(1))[0];
-		return uint32.toString(16);
-	}
-
-	function initLocalStorage() {
-		if (!localStorage.getItem("playerId")) {
-			const playerId = getRandomId();
-			localStorage.setItem("playerId", playerId);
-			localStorage.setItem("playerName", `Player${playerId}`);
-		}
-	}
 
 	const handleStartOrRestartClicked = (e) => {
 		e.currentTarget.blur();
@@ -1365,40 +1372,9 @@ window.addEventListener("load", () => {
 		}
 	}
 
-	function handleChangeUsernameBtnClicked() {
-		usernameForm.classList.remove("hidden");
-		usernameDisplay.classList.add("hidden");
-	}
-
-	function handleUsernameSubmit(e) {
-		console.log("submitting");
-		e.preventDefault();
-		console.log("submited");
-		localStorage.setItem("playerName", usernameEntry.value);
-		usernameValue.innerText = usernameEntry.value;
-		usernameForm.classList.add("hidden");
-		usernameDisplay.classList.remove("hidden");
-	}
-
-	const modal = document.getElementById("modal");
-	const modalCloseBtn = document.getElementById("modalClose");
-
-	function hideModal() {
-		modal.classList.add("hidden");
-	}
-
-	function showModal() {
-		modal.classList.remove("hidden");
-		currentGame?.pause();
-	}
-
 	function handleHelpBtnClicked() {
 		showModal();
 	}
-
-	initLocalStorage();
-	usernameValue.innerText = localStorage.getItem("playerName");
-	usernameEntry.value = localStorage.getItem("playerName");
 
 	startBtn.addEventListener("click", handleStartOrRestartClicked);
 	restartBtn.addEventListener("click", handleStartOrRestartClicked);
@@ -1406,21 +1382,52 @@ window.addEventListener("load", () => {
 	pauseButton.addEventListener("click", handlePlayOrPauseClicked);
 	unmuteButton.addEventListener("click", handleMuteOrUnmuteClicked);
 	muteButton.addEventListener("click", handleMuteOrUnmuteClicked);
-	changeUsernameBtn.addEventListener("click", handleChangeUsernameBtnClicked);
-	usernameForm.addEventListener("submit", handleUsernameSubmit);
 	helpBtns.forEach((btn) =>
 		btn.addEventListener("click", handleHelpBtnClicked)
 	);
 
-	modalCloseBtn.addEventListener("click", hideModal);
-	window.onclick = function (event) {
-		if (event.target == modal) {
-			hideModal();
+	// Setup Username
+	const username = document.querySelector(".username");
+	const changeUsernameBtn = username.querySelector(".changeUsernameBtn");
+	const usernameValue = username.querySelector(".username__value");
+	const usernameEntry = username.querySelector(".username__entry");
+	const usernameDisplay = username.querySelector(".username__display");
+	const usernameForm = username.querySelector(".username__form");
+
+	function getRandomId() {
+		const uint32 = window.crypto.getRandomValues(new Uint32Array(1))[0];
+		return uint32.toString(16);
+	}
+
+	function initLocalStorage() {
+		if (!localStorage.getItem("playerId")) {
+			const playerId = getRandomId();
+			localStorage.setItem("playerId", playerId);
+			localStorage.setItem("playerName", `Player${playerId}`);
 		}
-	};
+	}
 
-	// Help Modal
+	function handleChangeUsernameBtnClicked() {
+		usernameForm.classList.remove("hidden");
+		usernameDisplay.classList.add("hidden");
+	}
 
+	function handleUsernameSubmit(e) {
+		e.preventDefault();
+		localStorage.setItem("playerName", usernameEntry.value);
+		usernameValue.innerText = usernameEntry.value;
+		usernameForm.classList.add("hidden");
+		usernameDisplay.classList.remove("hidden");
+	}
+
+	initLocalStorage();
+	usernameValue.innerText = localStorage.getItem("playerName");
+	usernameEntry.value = localStorage.getItem("playerName");
+
+	changeUsernameBtn.addEventListener("click", handleChangeUsernameBtnClicked);
+	usernameForm.addEventListener("submit", handleUsernameSubmit);
+
+	// Setup Help Modal
 	const helpNavItems = document.querySelectorAll(".help__nav li");
 	const helpTabs = document.querySelectorAll(".help__tab");
 	const helpGoalNav = document.querySelector(".help__goal--nav");
