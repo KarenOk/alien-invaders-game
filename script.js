@@ -1428,6 +1428,7 @@ window.addEventListener("load", () => {
 	usernameForm.addEventListener("submit", handleUsernameSubmit);
 
 	// Setup Help Modal
+	const helpContent = document.querySelector(".help__content");
 	const helpNavItems = document.querySelectorAll(".help__nav li");
 	const helpTabs = document.querySelectorAll(".help__tab");
 	const helpGoalNav = document.querySelector(".help__goal--nav");
@@ -1475,4 +1476,44 @@ window.addEventListener("load", () => {
 			}
 		}
 	}
+
+	helpContent.querySelector(".placeholder.score").innerText = WINNING_SCORE;
+	helpContent.querySelector(".placeholder.timer").innerText =
+		GAME_TIME_MAX_MS / 1000;
+	helpContent.querySelector(".placeholder.lives-angler1").innerText =
+		ENEMY_ANGLER1_LIVES;
+	helpContent.querySelector(".placeholder.points-angler1").innerText =
+		ENEMY_ANGLER1_POINTS;
+	helpContent.querySelector(".placeholder.lives-angler2").innerText =
+		ENEMY_ANGLER2_LIVES;
+	helpContent.querySelector(".placeholder.points-angler2").innerText =
+		ENEMY_ANGLER2_POINTS;
+	helpContent.querySelector(".placeholder.lives-stalker").innerText =
+		ENEMY_STALKER_LIVES;
+	helpContent.querySelector(".placeholder.points-stalker").innerText =
+		ENEMY_STALKER_POINTS;
+	helpContent.querySelector(".placeholder.lives-razorfin").innerText =
+		ENEMY_STALKER_LIVES;
+	helpContent.querySelector(".placeholder.points-razorfin").innerText =
+		ENEMY_STALKER_POINTS;
+	helpContent.querySelector(".placeholder.lives-bulbwhale").innerText =
+		ENEMY_BULBWHALE_LIVES;
+	helpContent.querySelector(".placeholder.points-bulbwhale").innerText =
+		ENEMY_BULBWHALE_POINTS;
+	helpContent.querySelector(".placeholder.lives-lucky").innerText =
+		ENEMY_LUCKY_LIVES;
+	helpContent.querySelector(".placeholder.points-lucky").innerText =
+		ENEMY_LUCKY_POINTS;
+	helpContent.querySelector(".placeholder.lives-moonfish").innerText =
+		ENEMY_MOONFISH_LIVES;
+	helpContent.querySelector(".placeholder.points-moonfish").innerText =
+		ENEMY_MOONFISH_POINTS;
+	helpContent.querySelector(".placeholder.lives-hivewhale").innerText =
+		ENEMY_HIVEWHALE_LIVES;
+	helpContent.querySelector(".placeholder.points-hivewhale").innerText =
+		ENEMY_HIVEWHALE_POINTS;
+	helpContent.querySelector(".placeholder.lives-drone").innerText =
+		ENEMY_DRONE_LIVES;
+	helpContent.querySelector(".placeholder.points-drone").innerText =
+		ENEMY_DRONE_POINTS;
 });
