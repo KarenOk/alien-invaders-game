@@ -107,7 +107,7 @@ ul {
 }
 
 
-.splashscreen {
+.splashscreen, .mobile {
     height: 100vh;
     display: flex;
     justify-content: center;
@@ -120,7 +120,7 @@ ul {
     text-align: center;
 }
 
-.splashscreen__title {
+.splashscreen h1, .mobile h1 {
     font-size: 5em;
     color: #ffffbd;
     margin-bottom: 20px;
@@ -129,8 +129,6 @@ ul {
 .splashscreen__welcome {
     margin-bottom: 30px;
     font-size: 1.1em;
-    margin-bottom: 30px;
-
 }
 
 .splashscreen__actions button {
@@ -178,7 +176,7 @@ ul {
     height: 80%;
     overflow-y: auto;
     overflow-x: hidden;
-    max-width: 500px;
+    max-width: 800px;
 }
 
 .modal-close {
@@ -283,4 +281,28 @@ ul {
 .help__characters td {
     border: 1px solid black;
     padding: 10px;
+}
+
+.mobile {
+    padding: 30px;
+    display: none;
+}
+
+.mobile h1 {
+    font-size: 4em;
+}
+
+.mobile p {
+    font-size: 1.2em;
+    line-height: 150%;
+}
+
+@media only screen and (max-width: 500px) {
+    .mobile {
+        display: flex;
+    }
+
+    body>section:not(.mobile) {
+        display: none;
+    }
 }

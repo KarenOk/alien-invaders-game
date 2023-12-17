@@ -169,6 +169,36 @@ const KEY_DEBUG = "d";
 const KEY_PAUSE = "p";
 const KEY_MUTE = "m";
 
+/*  Placeholders */
+
+const PLACEHOLDERS = [
+	{ selector: ".placeholder.score", value: WINNING_SCORE },
+	{ selector: ".placeholder.timer", value: GAME_TIME_MAX_MS / 1000 },
+	{ selector: ".placeholder.lives-angler1", value: ENEMY_ANGLER1_LIVES },
+	{ selector: ".placeholder.points-angler1", value: ENEMY_ANGLER1_POINTS },
+	{ selector: ".placeholder.lives-angler2", value: ENEMY_ANGLER2_LIVES },
+	{ selector: ".placeholder.points-angler2", value: ENEMY_ANGLER2_POINTS },
+	{ selector: ".placeholder.lives-stalker", value: ENEMY_STALKER_LIVES },
+	{ selector: ".placeholder.points-stalker", value: ENEMY_STALKER_POINTS },
+	{ selector: ".placeholder.lives-razorfin", value: ENEMY_STALKER_LIVES },
+	{ selector: ".placeholder.points-razorfin", value: ENEMY_STALKER_POINTS },
+	{ selector: ".placeholder.lives-bulbwhale", value: ENEMY_BULBWHALE_LIVES },
+	{ selector: ".placeholder.points-bulbwhale", value: ENEMY_BULBWHALE_POINTS },
+	{ selector: ".placeholder.lives-lucky", value: ENEMY_LUCKY_LIVES },
+	{ selector: ".placeholder.points-lucky", value: ENEMY_LUCKY_POINTS },
+	{ selector: ".placeholder.lives-moonfish", value: ENEMY_MOONFISH_LIVES },
+	{ selector: ".placeholder.points-moonfish", value: ENEMY_MOONFISH_POINTS },
+	{ selector: ".placeholder.lives-hivewhale", value: ENEMY_HIVEWHALE_LIVES },
+	{ selector: ".placeholder.points-hivewhale", value: ENEMY_HIVEWHALE_POINTS },
+	{ selector: ".placeholder.lives-drone", value: ENEMY_DRONE_LIVES },
+	{ selector: ".placeholder.points-drone", value: ENEMY_DRONE_POINTS },
+	{ selector: ".placeholder.points-drone", value: ENEMY_DRONE_POINTS },
+	{
+		selector: ".placeholder.drones",
+		value: ENEMY_HIVEWHALE_DESTROYED_DRONES_AMOUNT,
+	},
+];
+
 /*
  *
  * GAME LOGIC
@@ -1477,43 +1507,8 @@ window.addEventListener("load", () => {
 		}
 	}
 
-	helpContent.querySelector(".placeholder.score").innerText = WINNING_SCORE;
-	helpContent.querySelector(".placeholder.timer").innerText =
-		GAME_TIME_MAX_MS / 1000;
-	helpContent.querySelector(".placeholder.lives-angler1").innerText =
-		ENEMY_ANGLER1_LIVES;
-	helpContent.querySelector(".placeholder.points-angler1").innerText =
-		ENEMY_ANGLER1_POINTS;
-	helpContent.querySelector(".placeholder.lives-angler2").innerText =
-		ENEMY_ANGLER2_LIVES;
-	helpContent.querySelector(".placeholder.points-angler2").innerText =
-		ENEMY_ANGLER2_POINTS;
-	helpContent.querySelector(".placeholder.lives-stalker").innerText =
-		ENEMY_STALKER_LIVES;
-	helpContent.querySelector(".placeholder.points-stalker").innerText =
-		ENEMY_STALKER_POINTS;
-	helpContent.querySelector(".placeholder.lives-razorfin").innerText =
-		ENEMY_STALKER_LIVES;
-	helpContent.querySelector(".placeholder.points-razorfin").innerText =
-		ENEMY_STALKER_POINTS;
-	helpContent.querySelector(".placeholder.lives-bulbwhale").innerText =
-		ENEMY_BULBWHALE_LIVES;
-	helpContent.querySelector(".placeholder.points-bulbwhale").innerText =
-		ENEMY_BULBWHALE_POINTS;
-	helpContent.querySelector(".placeholder.lives-lucky").innerText =
-		ENEMY_LUCKY_LIVES;
-	helpContent.querySelector(".placeholder.points-lucky").innerText =
-		ENEMY_LUCKY_POINTS;
-	helpContent.querySelector(".placeholder.lives-moonfish").innerText =
-		ENEMY_MOONFISH_LIVES;
-	helpContent.querySelector(".placeholder.points-moonfish").innerText =
-		ENEMY_MOONFISH_POINTS;
-	helpContent.querySelector(".placeholder.lives-hivewhale").innerText =
-		ENEMY_HIVEWHALE_LIVES;
-	helpContent.querySelector(".placeholder.points-hivewhale").innerText =
-		ENEMY_HIVEWHALE_POINTS;
-	helpContent.querySelector(".placeholder.lives-drone").innerText =
-		ENEMY_DRONE_LIVES;
-	helpContent.querySelector(".placeholder.points-drone").innerText =
-		ENEMY_DRONE_POINTS;
+	PLACEHOLDERS.forEach((placeholder) => {
+		helpContent.querySelector(placeholder.selector).innerText =
+			placeholder.value;
+	});
 });

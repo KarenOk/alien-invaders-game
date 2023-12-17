@@ -1,6 +1,7 @@
-[] Add Instructions
-[] Set correct game parameters
+[x] Add Instructions
+[x] Only available on a PC
 [x] Increase game dimensions
-[] Allow negative scores
 [x] Allow player move left and right to half of screen
-[x] Add leaderboard
+[] Set correct game parameters
+[] Allow negative scores
+[] Add leaderboard
