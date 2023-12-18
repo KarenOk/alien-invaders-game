@@ -40,7 +40,7 @@
                                         class="fa-solid fa-volume-high" title="Unmute Game"></i></button>
                         <button class="helpBtn icon-button icon-button--circle"><i class="fa-solid fa-question"
                                         title="Game Help"></i></button>
-                        <button class="icon-button icon-button--circle"><i class="fa-solid fa-trophy"
+                        <button class="leaderboardBtn icon-button icon-button--circle"><i class="fa-solid fa-trophy"
                                         title="Leaderboard"></i></button>
                 </div>
 
@@ -88,12 +88,12 @@
                         <span>Welcome, </span>
                         <div class="username">
                                 <div class="username__content username__display center">
-                                        <span class="username__value">Player12345788900</span>!
+                                        <span class="username__value"></span>!
                                         <button class="changeUsernameBtn" title="Change username"> <i
                                                         class="fa-solid fa-user-pen"></i></button>
                                 </div>
                                 <form class="username__content username__form center hidden">
-                                        <input class="username__entry" required name="username" />
+                                        <input class="username__entry" required name="username" minlength="4" />
                                         <button class="saveUsernameBtn" title="Save username"><i
                                                         class="fa-solid fa-floppy-disk"></i></i></button>
                                 </form>
@@ -115,7 +115,7 @@
                                         title="Close Popup"></i></button>
 
 
-                        <section id="help" class="help">
+                        <section id="help" class="help hidden">
                                 <h1 class="help__header">HOW TO PLAY</h1>
                                 <div class="help__content">
                                         <nav class="help__nav">
@@ -238,10 +238,10 @@
                                                                         <strong> ANGLER 1</strong> <br><br>
                                                                         <p> Basic enemy type with <span
                                                                                         class="placeholder lives-angler1"></span>
-                                                                                live(s).
+                                                                                lives.
                                                                                 Kill this enemy to gain <span
                                                                                         class="placeholder points-angler1"></span>
-                                                                                point(s).
+                                                                                points.
                                                                         </p>
                                                                 </td>
                                                         </tr>
@@ -252,10 +252,10 @@
                                                                         <strong> ANGLER 2</strong> <br><br>
                                                                         <p> Basic enemy type with <span
                                                                                         class="placeholder lives-angler2"></span>
-                                                                                live(s).
+                                                                                lives.
                                                                                 Kill this enemy to gain <span
                                                                                         class="placeholder points-angler2"></span>
-                                                                                point(s).
+                                                                                points.
                                                                         </p>
                                                                 </td>
                                                         </tr>
@@ -266,10 +266,10 @@
                                                                         <strong> STALKER</strong> <br><br>
                                                                         <p> Basic enemy type with <span
                                                                                         class="placeholder lives-stalker"></span>
-                                                                                live(s).
+                                                                                lives.
                                                                                 Kill this enemy to gain <span
                                                                                         class="placeholder points-stalker"></span>
-                                                                                point(s).
+                                                                                points.
                                                                         </p>
                                                                 </td>
                                                         </tr>
@@ -280,10 +280,10 @@
                                                                         <strong> RAZOR FIN</strong> <br><br>
                                                                         <p> Basic enemy type with <span
                                                                                         class="placeholder lives-razorfin"></span>
-                                                                                live(s).
+                                                                                lives.
                                                                                 Kill this enemy to gain <span
                                                                                         class="placeholder points-razorfin"></span>
-                                                                                point(s).
+                                                                                points.
                                                                         </p>
                                                                 </td>
                                                         </tr>
@@ -294,10 +294,10 @@
                                                                         <strong> BULB WHALE</strong> <br><br>
                                                                         <p> Basic enemy type with <span
                                                                                         class="placeholder lives-bulbwhale"></span>
-                                                                                live(s).
+                                                                                lives.
                                                                                 Kill this enemy to gain <span
                                                                                         class="placeholder points-bulbwhale"></span>
-                                                                                point(s).
+                                                                                points.
                                                                         </p>
                                                                 </td>
                                                         </tr>
@@ -313,10 +313,10 @@
                                                                         <strong> LUCKY</strong> <br><br>
                                                                         <p> Special enemy type with <span
                                                                                         class="placeholder lives-lucky"></span>
-                                                                                live(s).
+                                                                                lives.
                                                                                 Kill this enemy to gain <span
                                                                                         class="placeholder points-lucky"></span>
-                                                                                point(s) OR collide
+                                                                                points OR collide
                                                                                 with this enemy to enter power-up mode.
 
                                                                         </p>
@@ -329,10 +329,10 @@
                                                                         <strong> MOON FISH</strong> <br><br>
                                                                         <p> Special enemy type with <span
                                                                                         class="placeholder lives-moonfish"></span>
-                                                                                live(s).
+                                                                                lives.
                                                                                 Kill this enemy to gain <span
                                                                                         class="placeholder points-moonfish"></span>
-                                                                                point(s) AND enter
+                                                                                points AND enter
                                                                                 power-up mode.
                                                                         </p>
                                                                 </td>
@@ -344,12 +344,12 @@
                                                                         <strong> HIVE WHALE</strong> <br><br>
                                                                         <p> Special enemy type with <span
                                                                                         class="placeholder lives-hivewhale"></span>
-                                                                                live(s).
+                                                                                lives.
                                                                                 Kill this enemy to gain <span
                                                                                         class="placeholder points-hivewhale"></span>
-                                                                                point(s) AND release
+                                                                                points AND release
                                                                                 <span class="placeholder drones"></span>
-                                                                                drone(s).
+                                                                                drones.
                                                                         </p>
                                                                 </td>
                                                         </tr>
@@ -361,12 +361,12 @@
                                                                         <strong> DRONE</strong> <br><br>
                                                                         <p> Special enemy type with <span
                                                                                         class="placeholder lives-drone"></span>
-                                                                                live(s) that moves really fast. Only
+                                                                                life that moves really fast. Only
                                                                                 generated
                                                                                 when a Moon Fish is killed.
                                                                                 Kill this enemy to gain <span
                                                                                         class="placeholder points-drone"></span>
-                                                                                point(s).
+                                                                                point.
                                                                         </p>
                                                                 </td>
                                                         </tr>
@@ -375,10 +375,48 @@
                                         </article>
                                 </div>
                         </section>
+
+                        <section id="leaderboard" class="leaderboard hidden">
+                                <h1 class="leaderboard__header"> 🏆 LEADERBOARD 🏆</h1>
+                                <div class="leaderboard__content">
+                                        <p class="leaderboard__name">
+                                        <div>
+                                                <span>YOUR NAME: </span> <span class="username__value"></span>
+                                        </div>
+
+                                        <small class="leaderboard__helper">
+                                                <i class="fa-solid fa-circle-info"></i>
+                                                <span class="tooltiptext">Refresh
+                                                        this page to change your
+                                                        name</span>
+                                                <i class="fa-solid fa-circle-info"></i>
+
+                                        </small>
+                                        </p>
+
+                                        <table class="leaderboard__table">
+                                                <thead>
+                                                        <tr>
+                                                                <th> RANK </th>
+                                                                <th colspan="5"> NAME </th>
+                                                                <th> SCORE </th>
+                                                        </tr>
+                                                </thead>
+                                                <tbody>
+                                                        <tr class="active">
+                                                                <td> 1 🏅 </td>
+                                                                <td colspan="5"> Karen Okonkwo 🏅</td>
+                                                                <td> 200 🏅</td>
+                                                        </tr>
+                                                </tbody>
+                                        </table>
+                                </div>
+                        </section>
                 </div>
         </div>
 
-        <script src="./script.js"></script>
+        <script type="module" src="./firebase.js"></script>
+        <script type="module" src="./script.js"></script>
 </body>
 
 </html>

@@ -1,3 +1,5 @@
+import { UserStorage, Analytics } from "./firebase.js";
+
 /*
  *
  * CONSTANTS
@@ -150,8 +152,8 @@ const DISPLAY_GAMEOVER_TEXT_OFFSET_Y = 20;
 
 /* Game over */
 
-const GAMEOVER_MSG_WIN_MAIN_TEXT = "You Rock!";
-const GAMEOVER_MSG_WIN_SEC_TEXT = "You won the game!";
+const GAMEOVER_MSG_WIN_MAIN_TEXT = "You Won!";
+const GAMEOVER_MSG_WIN_SEC_TEXT = "Open the leaderboard to see where you rank!";
 const GAMEOVER_MSG_LOSS_MAIN_TEXT = "Bummer!";
 const GAMEOVER_MSG_LOSS_SEC_TEXT = "Better luck next time!";
 
@@ -169,7 +171,7 @@ const KEY_DEBUG = "d";
 const KEY_PAUSE = "p";
 const KEY_MUTE = "m";
 
-/*  Placeholders */
+/*  UI */
 
 const PLACEHOLDERS = [
 	{ selector: ".placeholder.score", value: WINNING_SCORE },
@@ -199,13 +201,24 @@ const PLACEHOLDERS = [
 	},
 ];
 
+const MODAL_TYPE_HELP = "help";
+const MODAL_TYPE_LEADERBOARD = "leaderboard";
+
+const HELP_GOAL_TAB = "goal";
+const HELP_GAME_PLAY_TAB = "game-play";
+const HELP_CHARACTERS_TAB = "characters";
+
 /*
  *
  * GAME LOGIC
  *
  */
 
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
+	const analytics = new Analytics();
+	const userStorage = new UserStorage();
+	await userStorage.init();
+
 	class InputHandler {
 		constructor(game) {
 			this.game = game;
@@ -225,9 +238,11 @@ window.addEventListener("load", () => {
 				} else if (e.key.toLowerCase() === KEY_PAUSE) {
 					this.game.paused = !this.game.paused;
 					togglePausePlayBtns(this.game.paused);
+					analytics.updatePausedStatus("keyboard", this.game.paused);
 				} else if (e.key.toLowerCase() === KEY_MUTE) {
 					this.game.muted = !this.game.muted;
 					toggleMuteUnmuteBtns(this.game.muted);
+					analytics.updateMuteStatus("keyboard", this.game.muted);
 				}
 			});
 
@@ -1088,10 +1103,18 @@ window.addEventListener("load", () => {
 
 			this.winningScore = WINNING_SCORE;
 			this.maxGameTime = GAME_TIME_MAX_MS;
+			this.publishedToLeaderboard = false;
 		}
 
 		update(deltaTime) {
 			if (this.gameTimer > this.maxGameTime) this.gameOver = true;
+
+			if (this.gameOver && !this.publishedToLeaderboard) {
+				this.publishedToLeaderboard = true;
+				if (this.score >= WINNING_SCORE) {
+					userStorage.update({ score: this.score }); // not waiting for response
+				}
+			}
 
 			if (!this.paused && !this.gameOver) {
 				this.gameTimer += deltaTime;
@@ -1323,6 +1346,9 @@ window.addEventListener("load", () => {
 	// Setup Modal
 	const modal = document.getElementById("modal");
 	const modalCloseBtn = document.getElementById("modalClose");
+	const modalContentHelp = document.getElementById("help");
+	const modalContentLeaderboard = document.getElementById("leaderboard");
+	const modalContents = [modalContentHelp, modalContentLeaderboard];
 
 	function hideModal() {
 		modal.classList.add("hidden");
@@ -1330,10 +1356,20 @@ window.addEventListener("load", () => {
 		togglePausePlayBtns(false);
 	}
 
-	function showModal() {
+	function showModal(type, source) {
 		modal.classList.remove("hidden");
 		currentGame?.pause();
 		togglePausePlayBtns(true);
+		modalContents.forEach((m) => m.classList.add("hidden"));
+
+		if (type === MODAL_TYPE_HELP) {
+			modalContentHelp.classList.remove("hidden");
+			analytics.openHelp(source);
+		} else if (type === MODAL_TYPE_LEADERBOARD) {
+			populateLeaderboard();
+			modalContentLeaderboard.classList.remove("hidden");
+			analytics.openLeaderboard(source);
+		}
 	}
 
 	modalCloseBtn.addEventListener("click", hideModal);
@@ -1349,28 +1385,11 @@ window.addEventListener("load", () => {
 	const startBtn = document.querySelector(".startBtn");
 	const restartBtn = document.querySelector(".restartBtn");
 	const helpBtns = document.querySelectorAll(".helpBtn");
+	const leaderboardBtns = document.querySelectorAll(".leaderboardBtn");
 	const playButton = document.querySelector(".playBtn");
 	const pauseButton = document.querySelector(".pauseBtn");
 	const muteButton = document.querySelector(".muteBtn");
 	const unmuteButton = document.querySelector(".unmuteBtn");
-
-	const handleStartOrRestartClicked = (e) => {
-		e.currentTarget.blur();
-
-		splashScreen.classList.add("hidden");
-		gameScreen.classList.remove("hidden");
-		startGame();
-	};
-
-	const handlePlayOrPauseClicked = (e) => {
-		e.currentTarget.blur();
-
-		if (!currentGame) return;
-		if (currentGame.paused) currentGame.play();
-		else currentGame.pause();
-
-		togglePausePlayBtns(currentGame.paused);
-	};
 
 	function togglePausePlayBtns(paused) {
 		if (paused) {
@@ -1382,16 +1401,6 @@ window.addEventListener("load", () => {
 		}
 	}
 
-	const handleMuteOrUnmuteClicked = (e) => {
-		e.currentTarget.blur();
-
-		if (!currentGame) return;
-		if (currentGame.muted) currentGame.unmute();
-		else currentGame.mute();
-
-		toggleMuteUnmuteBtns(currentGame.muted);
-	};
-
 	function toggleMuteUnmuteBtns(muted) {
 		if (muted) {
 			muteButton.classList.add("hidden");
@@ -1402,9 +1411,50 @@ window.addEventListener("load", () => {
 		}
 	}
 
-	function handleHelpBtnClicked() {
-		showModal();
+	function getModalBtnsClickSource(btn) {
+		if (btn.parentElement.classList.contains("game-controls")) {
+			return "gamescreen";
+		}
+		if (btn.parentElement.classList.contains("splashscreen__actions")) {
+			return "splashscreen";
+		}
 	}
+
+	const handleStartOrRestartClicked = (e, source) => {
+		e.currentTarget.blur();
+
+		splashScreen.classList.add("hidden");
+		gameScreen.classList.remove("hidden");
+		startGame();
+
+		if (e.currentTarget.classList.contains("restartBtn")) {
+			analytics.restartGame();
+		} else {
+			analytics.startGame();
+		}
+	};
+
+	const handlePlayOrPauseClicked = (e) => {
+		e.currentTarget.blur();
+
+		if (!currentGame) return;
+		if (currentGame.paused) currentGame.play();
+		else currentGame.pause();
+
+		togglePausePlayBtns(currentGame.paused);
+		analytics.updatePausedStatus("button", currentGame.paused);
+	};
+
+	const handleMuteOrUnmuteClicked = (e) => {
+		e.currentTarget.blur();
+
+		if (!currentGame) return;
+		if (currentGame.muted) currentGame.unmute();
+		else currentGame.mute();
+
+		toggleMuteUnmuteBtns(currentGame.muted);
+		analytics.updateMuteStatus("button", currentGame.muted);
+	};
 
 	startBtn.addEventListener("click", handleStartOrRestartClicked);
 	restartBtn.addEventListener("click", handleStartOrRestartClicked);
@@ -1413,64 +1463,65 @@ window.addEventListener("load", () => {
 	unmuteButton.addEventListener("click", handleMuteOrUnmuteClicked);
 	muteButton.addEventListener("click", handleMuteOrUnmuteClicked);
 	helpBtns.forEach((btn) =>
-		btn.addEventListener("click", handleHelpBtnClicked)
+		btn.addEventListener("click", () =>
+			showModal(MODAL_TYPE_HELP, getModalBtnsClickSource(btn))
+		)
+	);
+	leaderboardBtns.forEach((btn) =>
+		btn.addEventListener("click", () =>
+			showModal(MODAL_TYPE_LEADERBOARD, getModalBtnsClickSource(btn))
+		)
 	);
 
 	// Setup Username
 	const username = document.querySelector(".username");
+	const usernameValue = document.querySelectorAll(".username__value");
 	const changeUsernameBtn = username.querySelector(".changeUsernameBtn");
-	const usernameValue = username.querySelector(".username__value");
 	const usernameEntry = username.querySelector(".username__entry");
 	const usernameDisplay = username.querySelector(".username__display");
 	const usernameForm = username.querySelector(".username__form");
 
-	function getRandomId() {
-		const uint32 = window.crypto.getRandomValues(new Uint32Array(1))[0];
-		return uint32.toString(16);
-	}
-
-	function initLocalStorage() {
-		if (!localStorage.getItem("playerId")) {
-			const playerId = getRandomId();
-			localStorage.setItem("playerId", playerId);
-			localStorage.setItem("playerName", `Player${playerId}`);
-		}
-	}
+	usernameValue.forEach((el) => {
+		el.innerText = userStorage.user.name;
+	});
+	usernameEntry.value = userStorage.user.name;
 
 	function handleChangeUsernameBtnClicked() {
 		usernameForm.classList.remove("hidden");
 		usernameDisplay.classList.add("hidden");
 	}
 
-	function handleUsernameSubmit(e) {
+	async function handleUsernameSubmit(e) {
 		e.preventDefault();
-		localStorage.setItem("playerName", usernameEntry.value);
-		usernameValue.innerText = usernameEntry.value;
+		const name = usernameEntry.value;
+		try {
+			await userStorage.update({ name });
+			usernameValue.forEach((el) => {
+				el.innerText = name;
+			});
+		} catch {
+			alert("An error occured, username not saved.");
+		}
+
 		usernameForm.classList.add("hidden");
 		usernameDisplay.classList.remove("hidden");
-	}
 
-	initLocalStorage();
-	usernameValue.innerText = localStorage.getItem("playerName");
-	usernameEntry.value = localStorage.getItem("playerName");
+		analytics.updateUsername();
+	}
 
 	changeUsernameBtn.addEventListener("click", handleChangeUsernameBtnClicked);
 	usernameForm.addEventListener("submit", handleUsernameSubmit);
 
 	// Setup Help Modal
 	const helpContent = document.querySelector(".help__content");
-	const helpNavItems = document.querySelectorAll(".help__nav li");
-	const helpTabs = document.querySelectorAll(".help__tab");
-	const helpGoalNav = document.querySelector(".help__goal--nav");
-	const helpGamePlayNav = document.querySelector(".help__game-play--nav");
-	const helpCharactersNav = document.querySelector(".help__characters--nav");
-	const helpGoalSection = document.querySelector(".help__goal");
-	const helpGamePlaySection = document.querySelector(".help__game-play");
-	const helpCharactersSection = document.querySelector(".help__characters");
-
-	const HELP_GOAL_TAB = "goal";
-	const HELP_GAME_PLAY_TAB = "game-play";
-	const HELP_CHARACTERS_TAB = "characters";
+	const helpNavItems = helpContent.querySelectorAll(".help__nav li");
+	const helpTabs = helpContent.querySelectorAll(".help__tab");
+	const helpGoalNav = helpContent.querySelector(".help__goal--nav");
+	const helpGamePlayNav = helpContent.querySelector(".help__game-play--nav");
+	const helpCharactersNav = helpContent.querySelector(".help__characters--nav");
+	const helpGoalSection = helpContent.querySelector(".help__goal");
+	const helpGamePlaySection = helpContent.querySelector(".help__game-play");
+	const helpCharactersSection = helpContent.querySelector(".help__characters");
 
 	helpGoalNav.addEventListener("click", () =>
 		handleHelpNavigation(HELP_GOAL_TAB)
@@ -1510,5 +1561,36 @@ window.addEventListener("load", () => {
 	PLACEHOLDERS.forEach((placeholder) => {
 		helpContent.querySelector(placeholder.selector).innerText =
 			placeholder.value;
+	});
+
+	//  Setup Leaderboard Modal
+	async function populateLeaderboard() {
+		const leaderboardData = await userStorage.getLeaderboard();
+		const leaderboardContent = document.querySelector(".leaderboard__content");
+		const leaderboardTableBody = leaderboardContent.querySelector(
+			".leaderboard__table tbody"
+		);
+
+		const playerId = userStorage.user.id;
+		leaderboardTableBody.innerHTML = leaderboardData.reduce(
+			(previousHtml, user, index) => {
+				const trophy = index === 0 ? "🏅" : "";
+				const html = `
+			<tr ${playerId === user.id ? "class='active'" : ""}>
+					<td> ${index + 1} ${trophy} </td>
+					<td colspan="5">  ${user.name} ${trophy} </td>
+					<td>  ${user.score} ${trophy}</td>
+			</tr>
+			`;
+
+				return previousHtml + html;
+			},
+			""
+		);
+	}
+
+	// Setup Banner
+	document.querySelector(".github-link").addEventListener("click", () => {
+		analytics.githubNavigation();
 	});
 });

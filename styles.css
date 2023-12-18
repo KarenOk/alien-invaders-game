@@ -140,16 +140,12 @@ ul {
 
 .username {
     margin-left: 10px;
-}
-
-.username__content {
     margin-top: 6px;
 }
 
-
 .username button {
     margin-left: 5px;
-    font-size: 1em;
+    font-size: 0.8em;
 
 }
 
@@ -282,6 +278,53 @@ ul {
     border: 1px solid black;
     padding: 10px;
 }
+
+/*  Modal Content - Leaderboard */
+
+
+.leaderboard__name {
+    margin: 20px 0;
+}
+
+.leaderboard__name .username__value {
+    text-decoration: underline;
+}
+
+.leaderboard__helper {
+    font-size: 12px;
+    color: rgb(87, 84, 84);
+}
+
+.leaderboard table {
+    border-collapse: collapse;
+    text-align: left;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.leaderboard thead tr {
+    background-color: #193F6E;
+    color: white;
+    padding: 20px;
+
+}
+
+.leaderboard tr {
+    border: 1px solid #193F6E;
+}
+
+
+.leaderboard td, .leaderboard th {
+    padding: 20px 10px;
+}
+
+.leaderboard .active {
+    background-color: rgba(25, 63, 110, 0.3);
+    border: 4px dotted #193F6E;
+
+}
+
+/* Mobile  */
 
 .mobile {
     padding: 30px;
