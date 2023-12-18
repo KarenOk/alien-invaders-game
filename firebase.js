@@ -1,5 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+import {
+	getAnalytics,
+	logEvent,
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
 import {
 	getFirestore,
 	collection,
@@ -76,7 +79,7 @@ class UserStorage {
 				this.#persist({ ...this.user, ...newData });
 			}
 
-			if (user.score !== undefined) {
+			if (user.score !== undefined && user.score > this.user.score) {
 				const newData = { score: user.score };
 				await setDoc(userRef, newData, { merge: true });
 				this.#persist({ ...this.user, ...newData });
@@ -169,11 +172,11 @@ class Analytics {
 	openHelp(source) {
 		logEvent(analytics, this.OPEN_HELP, { source });
 	}
-	updateUsername(source) {
-		logEvent(analytics, this.UPDATE_USERNAME, { source });
+	updateUsername() {
+		logEvent(analytics, this.UPDATE_USERNAME);
 	}
-	startGame(source) {
-		logEvent(analytics, this.START_GAME, { source });
+	startGame(playerName) {
+		logEvent(analytics, this.START_GAME, { playerName });
 	}
 	restartGame() {
 		logEvent(analytics, this.RESTART_GAME);

@@ -2,6 +2,6 @@
 [x] Only available on a PC
 [x] Increase game dimensions
 [x] Allow player move left and right to half of screen
-[] Set correct game parameters
-[] Allow negative scores
+[x] Set correct game parameters
 [x] Add leaderboard
+[] Allow negative scores?

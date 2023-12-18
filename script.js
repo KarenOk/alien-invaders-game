@@ -124,12 +124,12 @@ const PARTICLE_BOUNCE_MAX_AMOUNT = 3;
 
 /* Ammo */
 
-const AMMO_INCREASE_INTERVAL_MS = 1000;
+const AMMO_INCREASE_INTERVAL_MS = 700;
 const AMMO_MAX_AMOUNT = 15;
 
 /* Powerup */
 
-const POWERUP_DURATION_MS = 5000;
+const POWERUP_DURATION_MS = 6000;
 const POWERUP_AMMO_INCREMENT = 0.1;
 
 /* Top left Display */
@@ -708,7 +708,7 @@ window.addEventListener("load", async () => {
 			this.width = ENEMY_HIVEWHALE_WIDTH;
 			this.height = ENEMY_HIVEWHALE_HEIGHT;
 			this.y = Math.random() * (this.game.height - this.height);
-			this.speedX = Math.random() * -1.2 - 0.2; // speed: -0.2 -> -1.2
+			this.speedX = Math.random() * -1.2 - 0.2; // speed: -0.2 -> -1.4
 
 			this.lives = ENEMY_HIVEWHALE_LIVES;
 			this.points = ENEMY_HIVEWHALE_POINTS;
@@ -728,7 +728,7 @@ window.addEventListener("load", async () => {
 			this.y = y;
 			this.width = ENEMY_DRONE_WIDTH;
 			this.height = ENEMY_DRONE_HEIGHT;
-			this.speedX = Math.random() * -5 - 1; // speed: -1 -> -5
+			this.speedX = Math.random() * -4 - 2; // speed: -2 -> -6
 
 			this.lives = ENEMY_DRONE_LIVES;
 			this.points = ENEMY_DRONE_POINTS;
@@ -747,7 +747,7 @@ window.addEventListener("load", async () => {
 			this.width = ENEMY_BULBWHALE_WIDTH;
 			this.height = ENEMY_BULBWHALE_HEIGHT;
 			this.y = Math.random() * (this.game.height - this.height);
-			this.speedX = Math.random() * -1.2 - 0.2; // speed: -0.2 -> -1.2
+			this.speedX = Math.random() * -1.2 - 0.2; // speed: -0.2 -> -1.4
 
 			this.lives = ENEMY_BULBWHALE_LIVES;
 			this.points = ENEMY_BULBWHALE_POINTS;
@@ -1430,7 +1430,7 @@ window.addEventListener("load", async () => {
 		if (e.currentTarget.classList.contains("restartBtn")) {
 			analytics.restartGame();
 		} else {
-			analytics.startGame();
+			analytics.startGame(userStorage.user.name);
 		}
 	};
 

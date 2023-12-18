@@ -6,4 +6,4 @@ Try it [here](https://alien-invaders-game.netlify.app)!
 
 ### Demo
 
-Coming soon!
+![Demo](./assets/images/demo.gif)
